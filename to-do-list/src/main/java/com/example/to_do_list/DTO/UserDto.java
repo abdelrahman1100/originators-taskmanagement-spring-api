@@ -1,12 +1,10 @@
-package com.example.to_do_list.model;
+package com.example.to_do_list.DTO;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.data.annotation.Id;
+import com.example.to_do_list.model.Todo;
 
 import java.util.List;
 
-public class DTO_User {
+public class UserDto {
 
     private String id;
 

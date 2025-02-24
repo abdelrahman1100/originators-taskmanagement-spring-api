@@ -3,12 +3,14 @@ package com.example.to_do_list.model;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
 @Document
+@TypeAlias("User")
 public class User {
 
     @Field
