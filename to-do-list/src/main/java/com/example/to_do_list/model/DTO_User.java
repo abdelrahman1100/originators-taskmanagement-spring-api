@@ -3,18 +3,18 @@ package com.example.to_do_list.model;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
-@Document
-public class User {
+public class DTO_User {
 
-    @Field
     private String id;
 
     private String user_name;
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     private String password;
 
@@ -22,10 +22,6 @@ public class User {
 
     public String getId() {
         return id;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public void setId(String id) {
