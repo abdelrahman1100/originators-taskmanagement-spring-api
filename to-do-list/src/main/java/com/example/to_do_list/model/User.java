@@ -1,11 +1,8 @@
 package com.example.to_do_list.model;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
@@ -13,10 +10,22 @@ import java.util.List;
 @TypeAlias("User")
 public class User {
 
-    @Field
+    @Id
     private String id;
 
-    private String user_name;
+    private String username;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setTodolists(List<Todo> todolists) {
+        this.todolists = todolists;
+    }
 
     private String password;
 
@@ -34,19 +43,19 @@ public class User {
         this.id = id;
     }
 
-    public String getUser_name() {
-        return user_name;
+    public void setUserName(String username) {
+        this.username = username;
     }
 
-    public void setUser_name(String user_name) {
-        this.user_name = user_name;
+    public String getPassword() {
+        return password;
     }
 
     public List<Todo> getTodolists() {
         return todolists;
     }
 
-    public void setTodolists(List<Todo> todolists) {
-        this.todolists = todolists;
+    public void setTodolists(Todo todolists) {
+        this.todolists.add(todolists);
     }
 }

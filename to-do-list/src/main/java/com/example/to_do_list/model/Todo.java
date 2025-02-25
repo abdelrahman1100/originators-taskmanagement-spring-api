@@ -1,14 +1,21 @@
 package com.example.to_do_list.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 public class Todo {
 
     private String task;
 
     private String description;
+
+    private Status status;
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
     public String getTask() {
         return task;
@@ -25,4 +32,5 @@ public class Todo {
     public void setDescription(String description) {
         this.description = description;
     }
+
 }

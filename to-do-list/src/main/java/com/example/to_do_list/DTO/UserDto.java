@@ -1,22 +1,22 @@
 package com.example.to_do_list.DTO;
 
 import com.example.to_do_list.model.Todo;
+import com.mongodb.lang.NonNull;
 
 import java.util.List;
 
 public class UserDto {
 
+
     private String id;
 
-    private String user_name;
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    private String username;
 
     private String password;
 
-    private List<Todo> todolists;
+    public List<Todo> getTodolists() {
+        return todolists;
+    }
 
     public String getId() {
         return id;
@@ -26,19 +26,30 @@ public class UserDto {
         this.id = id;
     }
 
-    public String getUser_name() {
-        return user_name;
+    private List<Todo> todolists;
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public void setUser_name(String user_name) {
-        this.user_name = user_name;
-    }
-
-    public List<Todo> getTodolists() {
-        return todolists;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setTodolists(List<Todo> todolists) {
         this.todolists = todolists;
     }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public List<Todo> getTodoLists() {
+        return todolists;
+    }
+
 }
