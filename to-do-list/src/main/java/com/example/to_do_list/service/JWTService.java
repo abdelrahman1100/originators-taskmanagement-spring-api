@@ -2,10 +2,12 @@ package com.example.to_do_list.service;
 
 import com.example.to_do_list.model.User;
 import com.example.to_do_list.model.UserDetailsImpl;
+import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -17,8 +19,12 @@ import java.util.function.Function;
 @Service
 public class JWTService {
 
+    private static final String SECRET_KEY;
 
-    private final String SECRET_KEY = "c7ce706d3baa73d9bd242fe9fac48fbf9fe4bb2025f4d65e39ebbd6d9be06631";
+    static {
+        Dotenv dotenv = Dotenv.load();
+        SECRET_KEY = dotenv.get("SECRET_KEY");
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
