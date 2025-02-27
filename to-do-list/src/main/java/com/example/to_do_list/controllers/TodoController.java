@@ -1,14 +1,14 @@
-package com.example.to_do_list.controller;
+package com.example.to_do_list.controllers;
 
-import com.example.to_do_list.service.UserService;
+import com.example.to_do_list.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class UserController {
+public class TodoController {
 
     @Autowired
-    UserService userService;
+    TodoService todoService;
 
 //    @GetMapping("/get-list")
 //    public List<Todo> getList(@RequestParam String id) {

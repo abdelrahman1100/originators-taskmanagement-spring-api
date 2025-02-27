@@ -1,4 +1,4 @@
-package com.example.to_do_list.model;
+package com.example.to_do_list.models;
 
 public enum Status {
     PENDING,

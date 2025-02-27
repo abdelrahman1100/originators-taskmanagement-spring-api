@@ -1,18 +1,19 @@
-package com.example.to_do_list.DTO;
+package com.example.to_do_list.models;
 
-public class TodoDto {
+
+public class TodoEntity {
 
     private String task;
 
     private String description;
 
-    private Enum status;
+    private Status status;
 
-    public Enum getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(Enum status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
@@ -31,4 +32,5 @@ public class TodoDto {
     public void setDescription(String description) {
         this.description = description;
     }
+
 }
