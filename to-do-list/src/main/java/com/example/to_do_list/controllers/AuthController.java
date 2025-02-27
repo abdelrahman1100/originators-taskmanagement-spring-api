@@ -1,7 +1,6 @@
 package com.example.to_do_list.controllers;
 
 
-import com.example.to_do_list.dto.AuthResponseDTO;
 import com.example.to_do_list.dto.LoginDTO;
 import com.example.to_do_list.dto.RegisterDTO;
 import com.example.to_do_list.service.AuthService;
@@ -22,15 +21,14 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginDTO loginDto) {
-        AuthResponseDTO response = authService.authenticateUser(loginDto);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterDTO registerDto) {
+        return authService.registerUser(registerDto);
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterDTO registerDto) {
-        String response = authService.registerUser(registerDto);
+    @PostMapping("/login")
+    public ResponseEntity<ResponseEntity<?>> login(@RequestBody LoginDTO loginDto) {
+        ResponseEntity<?> response = authService.loginUser(loginDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

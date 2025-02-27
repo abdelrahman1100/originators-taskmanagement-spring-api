@@ -6,8 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Document
-@TypeAlias("User")
+@Document(collection = "user")
 public class UserEntity {
 
     @Id
