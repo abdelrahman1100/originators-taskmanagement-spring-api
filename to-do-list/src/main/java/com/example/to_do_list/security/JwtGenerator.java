@@ -1,19 +1,23 @@
 package com.example.to_do_list.security;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Component
 public class JwtGenerator {
-    private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+    private static final String SECRET_KEY;
+
+    static {
+        Dotenv dotenv = Dotenv.load();
+        SECRET_KEY = dotenv.get("SECRET_KEY");
+    }
 
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
@@ -22,15 +26,16 @@ public class JwtGenerator {
 
         String token = Jwts.builder()
                 .setSubject(username)
-                .setIssuedAt( new Date())
+                .setIssuedAt(new Date())
                 .setExpiration(expireDate)
-                .signWith(key,SignatureAlgorithm.HS512)
+                .signWith(getSigningKey())
                 .compact();
         return token;
     }
-    public String getUsernameFromJWT(String token){
+
+    public String getUsernameFromJWT(String token) {
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -40,13 +45,18 @@ public class JwtGenerator {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(key)
+                    .setSigningKey(SECRET_KEY)
                     .build()
                     .parseClaimsJws(token);
             return true;
         } catch (Exception ex) {
-            throw new AuthenticationCredentialsNotFoundException("JWT was exprired or incorrect",ex.fillInStackTrace());
+            return false;
         }
+    }
+
+    private SecretKey getSigningKey() {
+        byte[] KeyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(KeyBytes);
     }
 
 }
