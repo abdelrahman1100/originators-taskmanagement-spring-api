@@ -3,26 +3,28 @@ package com.example.to_do_list.models;
 
 public class TodoEntity {
 
-    private String task;
+    private Long id;
+
+    private String title;
 
     private String description;
 
     private Status status;
 
-    public Status getStatus() {
-        return status;
+    public Long getId() {
+        return id;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getTask() {
-        return task;
+    public String getTitle() {
+        return title;
     }
 
-    public void setTask(String task) {
-        this.task = task;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDescription() {
@@ -33,4 +35,11 @@ public class TodoEntity {
         this.description = description;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }

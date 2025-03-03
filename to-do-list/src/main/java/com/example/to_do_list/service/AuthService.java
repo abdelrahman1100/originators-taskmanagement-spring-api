@@ -33,9 +33,9 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
     }
 
-    public String registerUser(RegisterDTO registerDto) {
+    public ResponseEntity<?> registerUser(RegisterDTO registerDto) {
         if (userRepository.existsByUsername(registerDto.getUsername())) {
-            return ("Username is taken!");
+            return new ResponseEntity<>("Username is already taken!", HttpStatus.CONFLICT);
         }
 
         UserEntity user = new UserEntity();
@@ -44,17 +44,21 @@ public class AuthService {
 
         userRepository.save(user);
 
-        return ("User registered success!");
+        return new ResponseEntity<>("User registered successfully!", HttpStatus.OK);
     }
 
-    public AuthResponseDTO authenticateUser(LoginDTO loginDto) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginDto.getUsername(),
-                        loginDto.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = jwtGenerator.generateToken(authentication);
-        return new AuthResponseDTO(token);
+    public ResponseEntity<?> authenticateUser(LoginDTO loginDto) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginDto.getUsername(),
+                            loginDto.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String token = jwtGenerator.generateToken(authentication);
+            return new ResponseEntity<>(new AuthResponseDTO(token), HttpStatus.OK);
+        } catch (BadCredentialsException e) {
+            return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
+        }
     }
 
 }
