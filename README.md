@@ -1,6 +1,6 @@
 # Originators Todo List API
 
-<img src="https://spring.io/images/spring-logo-2023-dark.svg" alt="Spring Boot Logo" width="200">
+![Spring Boot Logo](https://spring.io/images/spring-logo-2023-dark.svg)
 
 ## Overview
 The **Originators Todo List API** is a Spring Boot-based backend service for managing a to-do list application. It provides endpoints for creating, updating, retrieving, and deleting tasks, supporting multiple users and authentication mechanisms.
