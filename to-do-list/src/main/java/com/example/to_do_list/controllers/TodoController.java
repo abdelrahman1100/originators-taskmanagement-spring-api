@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/todo")
 public class TodoController {
@@ -33,9 +35,39 @@ public class TodoController {
     }
 
     @DeleteMapping("/delete-todo")
-    public ResponseEntity<?> deleteTodo(@RequestHeader("Authorization") String token, @RequestHeader Long id) {
+    public ResponseEntity<?> deleteTodo(@RequestHeader("Authorization") String token, @RequestHeader("id") Long id) {
         token = token.substring(7);
         return todoService.deleteTodo(token, id);
+    }
+
+    @GetMapping("/get-todo")
+    public ResponseEntity<?> getTodo(@RequestHeader("Authorization") String token, @RequestHeader("id") Long id) {
+        token = token.substring(7);
+        return todoService.getTodo(token, id);
+    }
+
+    @DeleteMapping("/delete-all-todos")
+    public ResponseEntity<?> deleteAllTodos(@RequestHeader("Authorization") String token) {
+        token = token.substring(7);
+        return todoService.deleteAllTodos(token);
+    }
+
+    @GetMapping("/get-todos-by-status")
+    public ResponseEntity<?> getTodosByStatus(@RequestHeader("Authorization") String token, @RequestHeader("status") String status) {
+        token = token.substring(7);
+        return todoService.getTodosByStatus(token, status);
+    }
+
+    @DeleteMapping("/delete-many-todos")
+    public ResponseEntity<?> deleteManyTodos(@RequestHeader("Authorization") String token, @RequestHeader("ids") String ids) {
+        token = token.substring(7);
+        return todoService.deleteManyTodos(token, ids);
+    }
+
+    @PutMapping("/edit-many-todos")
+    public ResponseEntity<?> editManyTodos(@RequestHeader("Authorization") String token, @RequestBody List<TodoDto> todoDtoList) {
+        token = token.substring(7);
+        return todoService.editManyTodos(token, todoDtoList);
     }
 
 }
