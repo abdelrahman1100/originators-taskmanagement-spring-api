@@ -10,7 +10,7 @@ Search & Filters (Find tasks by priority, date, or status)
 Activity Logs (Track task updates)
 Dark Mode Support (For the frontend if applicable)
 3. Tech Stack
-Backend: Spring Boot, Spring Security, JPA (Hibernate)
+Backend: Spring Boot, Spring Security, Spring Data MongoDB
 Database: MongoDB
 Authentication: JWT
 CI/CD: GitHub Actions, Docker
