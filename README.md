@@ -29,12 +29,10 @@ The **Originators Todo List API** is a Spring Boot-based backend service for man
 
 ### How to Set Up the Environment
 1. Install **Java 17+** if not already installed.
-2. Install **Maven** or **Gradle**.
-3. Set up a database (MySQL / PostgreSQL / MongoDB) and configure connection settings in `src/main/resources/application.properties`:
+2. Install **Maven**
+3. Set up a database (MongoDB) and configure connection settings in `src/main/resources/application.properties`:
    ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/todolist
-   spring.datasource.username=root
-   spring.datasource.password=yourpassword
+   spring.data.mongodb.uri=mongodb://localhost:27017/to-do-list
    ```
 
 ### How to Run the Application Locally
@@ -43,14 +41,10 @@ The **Originators Todo List API** is a Spring Boot-based backend service for man
    ```bash
    mvn spring-boot:run
    ```
-   Or using Gradle:
-   ```bash
-   ./gradlew bootRun
-   ```
 3. The application will start on **http://localhost:8080**.
 
 ### How to Test API Endpoints
-1. Use **Postman**, **cURL**, or any API testing tool.
+1. Use **Postman** or any API testing tool.
 2. Example requests:
    - **Register a user:**
      ```bash
@@ -62,7 +56,7 @@ The **Originators Todo List API** is a Spring Boot-based backend service for man
      ```
    - **Create a task:**
      ```bash
-     curl -X POST http://localhost:8080/tasks -H "Authorization: Bearer YOUR_JWT_TOKEN" -H "Content-Type: application/json" -d '{"title":"New Task","description":"Task details"}'
+     curl -X POST http://localhost:8080/todo/create-todo -H "Authorization: Bearer YOUR_JWT_TOKEN" -H "Content-Type: application/json" -d '{"title":"New Task","description":"Task details","status":"DONE"}'
      ```
 
 ## API Endpoints
