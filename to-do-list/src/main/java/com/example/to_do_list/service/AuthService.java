@@ -37,7 +37,12 @@ public class AuthService {
         if (userRepository.existsByUsername(registerDto.getUsername())) {
             return new ResponseEntity<>("Username is already taken!", HttpStatus.CONFLICT);
         }
-
+        if (registerDto.getUsername().length() < 3 || registerDto.getUsername().length() > 20) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username must be between 3 and 20 characters");
+        }
+        if (registerDto.getPassword().length() < 6 || registerDto.getPassword().length() > 40) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be between 6 and 40 characters");
+        }
         UserEntity user = new UserEntity();
         user.setUsername(registerDto.getUsername());
         user.setPassword(passwordEncoder.encode((registerDto.getPassword())));

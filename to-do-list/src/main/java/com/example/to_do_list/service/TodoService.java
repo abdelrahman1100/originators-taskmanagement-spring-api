@@ -1,6 +1,7 @@
 package com.example.to_do_list.service;
 
 import com.example.to_do_list.dto.TodoDto;
+import com.example.to_do_list.models.Status;
 import com.example.to_do_list.models.TodoEntity;
 import com.example.to_do_list.models.UserEntity;
 import com.example.to_do_list.repository.UserRepository;
@@ -10,8 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TodoService {
@@ -32,6 +35,9 @@ public class TodoService {
             return ResponseEntity.badRequest().body("User not found");
         }
         List<TodoEntity> todos = user.get().getTodolist();
+        if (todos == null) {
+            todos = List.of();
+        }
         return new ResponseEntity<>(todos, HttpStatus.OK);
     }
 
@@ -47,8 +53,7 @@ public class TodoService {
         todo.setStatus(todoDto.getStatus());
         if (user.get().getTodolist() == null) {
             todo.setId(1L);
-        }
-        else {
+        } else {
             todo.setId(user.get().getTodolist().size() + 1L);
         }
         if (user.get().getTodolist() == null) {
@@ -95,5 +100,92 @@ public class TodoService {
             }
         }
         return ResponseEntity.badRequest().body("Todo not found");
+    }
+
+    public ResponseEntity<?> getTodo(String token, Long id) {
+        String username = jwtGenerator.getUsernameFromJWT(token);
+        Optional<UserEntity> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
+        }
+        List<TodoEntity> todos = user.get().getTodolist();
+        for (TodoEntity todo : todos) {
+            if (todo.getId().equals(id)) {
+                return new ResponseEntity<>(todo, HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>("Todo not found", HttpStatus.BAD_REQUEST);
+    }
+
+    public ResponseEntity<?> deleteAllTodos(String token) {
+        String username = jwtGenerator.getUsernameFromJWT(token);
+        Optional<UserEntity> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
+        }
+        user.get().setTodolist(null);
+        userRepository.save(user.get());
+        return new ResponseEntity<>("All todos deleted successfully", HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> getTodosByStatus(String token, String status) {
+        Status statusEnum;
+        try {
+            statusEnum = Status.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>("Invalid status", HttpStatus.BAD_REQUEST);
+        }
+        String username = jwtGenerator.getUsernameFromJWT(token);
+        Optional<UserEntity> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
+        }
+        List<TodoEntity> todos = user.get().getTodolist();
+        List<TodoEntity> todosByStatus = todos.stream().filter(todo -> todo.getStatus().equals(statusEnum)).toList();
+        return new ResponseEntity<>(todosByStatus, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> deleteManyTodos(String token, String ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ResponseEntity<>("No ids provided", HttpStatus.BAD_REQUEST);
+        }
+        List<Long> idList;
+        try {
+            idList = Arrays.stream(ids.split(","))
+                    .map(String::trim) // Remove spaces
+                    .map(Long::parseLong) // Convert to Long
+                    .collect(Collectors.toList());
+        } catch (NumberFormatException e) {
+            return new ResponseEntity<>("Invalid ID format. IDs must be numbers.", HttpStatus.BAD_REQUEST);
+        }
+        String username = jwtGenerator.getUsernameFromJWT(token);
+        Optional<UserEntity> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
+        }
+        List<TodoEntity> todos = user.get().getTodolist();
+        todos.removeIf(todo -> idList.contains(todo.getId()));
+        userRepository.save(user.get());
+        return new ResponseEntity<>("Todos deleted successfully", HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> editManyTodos(String token, List<TodoDto> todoDtoList) {
+        String username = jwtGenerator.getUsernameFromJWT(token);
+        Optional<UserEntity> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
+        }
+        List<TodoEntity> todos = user.get().getTodolist();
+        for (TodoDto todoDto : todoDtoList) {
+            for (TodoEntity todo : todos) {
+                if (todo.getId().equals(todoDto.getId())) {
+                    todo.setTitle(todoDto.getTitle());
+                    todo.setDescription(todoDto.getDescription());
+                    todo.setStatus(todoDto.getStatus());
+                }
+            }
+        }
+        userRepository.save(user.get());
+        return new ResponseEntity<>("Todos updated successfully", HttpStatus.OK);
     }
 }
