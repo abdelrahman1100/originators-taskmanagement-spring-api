@@ -1,5 +1,6 @@
 package com.example.to_do_list.security;
 
+import com.example.to_do_list.repository.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JwtGenerator tokenGenerator;
     @Autowired
     private UserDetailsService customUserDetailsService;
+    @Autowired
+    private TokenRepository tokenRepository;
 
 
     @Override
@@ -28,7 +31,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String token = getJWTFromRequest(request);
-        if(StringUtils.hasText(token) && tokenGenerator.validateToken(token)) {
+        if (StringUtils.hasText(token) && tokenRepository.existsByToken(token)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is invalid");
+            return;
+        }
+        if (StringUtils.hasText(token) && tokenGenerator.validateToken(token)) {
             String username = tokenGenerator.getUsernameFromJWT(token);
 
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
@@ -42,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String getJWTFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7, bearerToken.length());
         }
         return null;
