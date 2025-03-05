@@ -3,8 +3,10 @@ package com.example.to_do_list.service;
 import com.example.to_do_list.dto.AuthResponseDTO;
 import com.example.to_do_list.dto.LoginDTO;
 import com.example.to_do_list.dto.RegisterDTO;
+import com.example.to_do_list.models.BlacklistedTokens;
 import com.example.to_do_list.models.UserDetailsImpl;
 import com.example.to_do_list.models.UserEntity;
+import com.example.to_do_list.repository.TokenRepository;
 import com.example.to_do_list.repository.UserRepository;
 import com.example.to_do_list.security.JwtGenerator;
 import org.springframework.http.HttpStatus;
@@ -24,13 +26,15 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtGenerator jwtGenerator;
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtGenerator jwtGenerator, AuthenticationManager authenticationManager, JwtGenerator jwtGenerator1) {
-        this.jwtGenerator = jwtGenerator1;
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtGenerator jwtGenerator, AuthenticationManager authenticationManager, TokenRepository tokenRepository) {
+        this.jwtGenerator = jwtGenerator;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.tokenRepository = tokenRepository;
     }
 
     public ResponseEntity<?> registerUser(RegisterDTO registerDto) {
@@ -66,4 +70,10 @@ public class AuthService {
         }
     }
 
+    public ResponseEntity<?> logout(String token) {
+        token = token.substring(7);
+        BlacklistedTokens blacklistedToken = new BlacklistedTokens(token);
+        tokenRepository.save(blacklistedToken);
+        return new ResponseEntity<>("User logged out successfully!", HttpStatus.OK);
+    }
 }
