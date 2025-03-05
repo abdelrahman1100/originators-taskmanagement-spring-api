@@ -7,17 +7,13 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Component
 public class JwtGenerator {
-    private static final String SECRET_KEY;
-
-    static {
-        Dotenv dotenv = Dotenv.load();
-        SECRET_KEY = dotenv.get("SECRET_KEY");
-    }
+    private static final String SECRET_KEY = "5f1b41f01a99eef508a94bff09bedbe975e44abcf6f4cfbf73307b4ab5895328";
 
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
