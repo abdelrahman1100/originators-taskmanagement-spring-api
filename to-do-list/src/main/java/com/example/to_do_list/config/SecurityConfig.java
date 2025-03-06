@@ -1,11 +1,16 @@
 package com.example.to_do_list.config;
 
+import com.example.to_do_list.handlers.CustomOAuth2SuccessHandler;
+import com.example.to_do_list.repository.UserRepository;
 import com.example.to_do_list.security.JwtAuthenticationFilter;
 import com.example.to_do_list.security.JwtAuthEntryPoint;
+import com.example.to_do_list.security.JwtGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,12 +28,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private JwtAuthEntryPoint authEntryPoint;
-    private UserDetailsService userDetailsService;
+    private CustomOAuth2SuccessHandler successHandler;
 
     @Autowired
-    public SecurityConfig(UserDetailsService userDetailsService, JwtAuthEntryPoint authEntryPoint) {
-        this.userDetailsService = userDetailsService;
+    public SecurityConfig(JwtAuthEntryPoint authEntryPoint, @Lazy CustomOAuth2SuccessHandler successHandler) {
         this.authEntryPoint = authEntryPoint;
+        this.successHandler = successHandler;
     }
 
     @Bean
@@ -38,10 +43,14 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("auth/**", "/api/**", "/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**")
+                        .requestMatchers("auth/**", "/api/**", "/swagger-ui/**", "/api-docs/**", "/v3/api-docs/**", "oauth2/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(successHandler)
+                        .failureUrl("/login")
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -61,5 +70,10 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter();
+    }
+
+    @Bean
+    public CustomOAuth2SuccessHandler customOAuth2SuccessHandler() {
+        return new CustomOAuth2SuccessHandler();
     }
 }
