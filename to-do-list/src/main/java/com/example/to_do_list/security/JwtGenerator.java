@@ -13,7 +13,7 @@ import java.util.Date;
 
 @Component
 public class JwtGenerator {
-    private static final String SECRET_KEY = "5f1b41f01a99eef508a94bff09bedbe975e44abcf6f4cfbf73307b4ab5895328";
+    private static final String SECRET_KEY = SecurityConstants.SECRET_KEY;
 
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
