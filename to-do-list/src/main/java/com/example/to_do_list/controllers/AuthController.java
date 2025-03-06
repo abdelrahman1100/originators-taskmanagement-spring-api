@@ -13,6 +13,8 @@ public class AuthController {
 
     private AuthService authService;
 
+
+    // TODO: authService to be authenticationService
     public AuthController(AuthService authService) {
         this.authService = authService;
     }

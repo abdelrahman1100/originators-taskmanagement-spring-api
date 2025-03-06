@@ -18,6 +18,8 @@ public class TodoController {
 
     @GetMapping("/get-todos")
     public ResponseEntity<?> getTodos(@RequestHeader("Authorization") String token) {
+        // TODO: remove any business code to services and make controller plain and simple 
+        // pass token to service and return the response
         token = token.substring(7);
         return todoService.getTodos(token);
     }

@@ -37,11 +37,13 @@ public class AuthService {
         this.tokenRepository = tokenRepository;
     }
 
+    // TODO: change return type from (?) to be specific type
     public ResponseEntity<?> registerUser(RegisterDTO registerDto) {
         if (userRepository.existsByUsername(registerDto.getUsername())) {
             return new ResponseEntity<>("Username is already taken!", HttpStatus.CONFLICT);
         }
         if (registerDto.getUsername().length() < 3 || registerDto.getUsername().length() > 20) {
+            // TODO: make expclcit error message in a constant file and just pass here the key
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username must be between 3 and 20 characters");
         }
         if (registerDto.getPassword().length() < 6 || registerDto.getPassword().length() > 40) {

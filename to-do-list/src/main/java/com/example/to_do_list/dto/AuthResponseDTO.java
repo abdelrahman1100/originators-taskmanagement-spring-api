@@ -1,3 +1,4 @@
+// TODO: change example to your application name
 package com.example.to_do_list.dto;
 
 public class AuthResponseDTO {
