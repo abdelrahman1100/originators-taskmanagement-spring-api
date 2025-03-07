@@ -42,7 +42,7 @@ public class TodoService {
         if (todos == null || todos.isEmpty()) {
             return new ResponseEntity<>(List.of(), HttpStatus.OK);
         }
-        page--;
+        if (page > 0) page--;
         int start = Math.min(page * size, todos.size());
         int end = Math.min(start + size, todos.size());
         List<TodoEntity> paginatedTodos = todos.subList(start, end);
@@ -158,7 +158,7 @@ public class TodoService {
         if (todos == null || todos.isEmpty()) {
             return new ResponseEntity<>(List.of(), HttpStatus.OK);
         }
-        page--;
+        if (page > 0) page--;
         int start = Math.min(page * size, todos.size());
         int end = Math.min(start + size, todos.size());
         List<TodoEntity> paginatedTodos = todos.stream().filter(todo -> todo.getStatus().equals(statusEnum)).toList().subList(start, end);

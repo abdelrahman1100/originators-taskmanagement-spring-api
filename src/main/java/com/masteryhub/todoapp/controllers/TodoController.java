@@ -16,7 +16,8 @@ public class TodoController {
     TodoService todoService;
 
     @GetMapping("/get-todos")
-    public ResponseEntity<?> getTodos(@RequestHeader("Authorization") String token, @RequestHeader("page") int page, @RequestHeader("size") int size) {
+    public ResponseEntity<?> getTodos(@RequestHeader("Authorization") String token, @RequestParam(name = "page", defaultValue = "0") int page,
+                                      @RequestParam(name = "size", defaultValue = "10") int size) {
         return todoService.getTodos(token, page, size);
     }
 
@@ -46,7 +47,8 @@ public class TodoController {
     }
 
     @GetMapping("/get-todos-by-status")
-    public ResponseEntity<?> getTodosByStatus(@RequestHeader("Authorization") String token, @RequestHeader("status") String status, @RequestHeader("page") int page, @RequestHeader("size") int size) {
+    public ResponseEntity<?> getTodosByStatus(@RequestHeader("Authorization") String token, @RequestHeader("status") String status, @RequestParam(name = "page", defaultValue = "0") int page,
+                                              @RequestParam(name = "size", defaultValue = "10") int size) {
         return todoService.getTodosByStatus(token, status, page, size);
     }
 
