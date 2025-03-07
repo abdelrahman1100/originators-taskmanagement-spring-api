@@ -16,8 +16,8 @@ public class TodoController {
     TodoService todoService;
 
     @GetMapping("/get-todos")
-    public ResponseEntity<?> getTodos(@RequestHeader("Authorization") String token) {
-        return todoService.getTodos(token);
+    public ResponseEntity<?> getTodos(@RequestHeader("Authorization") String token, @RequestHeader("page") int page, @RequestHeader("size") int size) {
+        return todoService.getTodos(token, page, size);
     }
 
     @PostMapping("/create-todo")
@@ -46,8 +46,8 @@ public class TodoController {
     }
 
     @GetMapping("/get-todos-by-status")
-    public ResponseEntity<?> getTodosByStatus(@RequestHeader("Authorization") String token, @RequestHeader("status") String status) {
-        return todoService.getTodosByStatus(token, status);
+    public ResponseEntity<?> getTodosByStatus(@RequestHeader("Authorization") String token, @RequestHeader("status") String status, @RequestHeader("page") int page, @RequestHeader("size") int size) {
+        return todoService.getTodosByStatus(token, status, page, size);
     }
 
     @DeleteMapping("/delete-many-todos")
