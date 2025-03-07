@@ -7,6 +7,9 @@ import com.masteryhub.todoapp.models.UserEntity;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,7 +31,7 @@ public class TodoService {
         this.userRepository = userRepository;
     }
 
-    public ResponseEntity<?> getTodos(String token) {
+    public ResponseEntity<?> getTodos(String token, int page, int size) {
         token = token.substring(7);
         String username = jwtGenerator.getUsernameFromJWT(token);
         Optional<UserEntity> user = userRepository.findByUsername(username);
@@ -36,10 +39,14 @@ public class TodoService {
             return ResponseEntity.badRequest().body("User not found");
         }
         List<TodoEntity> todos = user.get().getTodolist();
-        if (todos == null) {
-            todos = List.of();
+        if (todos == null || todos.isEmpty()) {
+            return new ResponseEntity<>(List.of(), HttpStatus.OK);
         }
-        return new ResponseEntity<>(todos, HttpStatus.OK);
+        page--;
+        int start = Math.min(page * size, todos.size());
+        int end = Math.min(start + size, todos.size());
+        List<TodoEntity> paginatedTodos = todos.subList(start, end);
+        return new ResponseEntity<>(paginatedTodos, HttpStatus.OK);
     }
 
     public ResponseEntity<?> createTodo(String token, TodoDto todoDto) {
@@ -134,7 +141,7 @@ public class TodoService {
         return new ResponseEntity<>("All todos deleted successfully", HttpStatus.OK);
     }
 
-    public ResponseEntity<?> getTodosByStatus(String token, String status) {
+    public ResponseEntity<?> getTodosByStatus(String token, String status, int page, int size) {
         token = token.substring(7);
         Status statusEnum;
         try {
@@ -148,8 +155,14 @@ public class TodoService {
             return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
         }
         List<TodoEntity> todos = user.get().getTodolist();
-        List<TodoEntity> todosByStatus = todos.stream().filter(todo -> todo.getStatus().equals(statusEnum)).toList();
-        return new ResponseEntity<>(todosByStatus, HttpStatus.OK);
+        if (todos == null || todos.isEmpty()) {
+            return new ResponseEntity<>(List.of(), HttpStatus.OK);
+        }
+        page--;
+        int start = Math.min(page * size, todos.size());
+        int end = Math.min(start + size, todos.size());
+        List<TodoEntity> paginatedTodos = todos.stream().filter(todo -> todo.getStatus().equals(statusEnum)).toList().subList(start, end);
+        return new ResponseEntity<>(paginatedTodos, HttpStatus.OK);
     }
 
     public ResponseEntity<?> deleteManyTodos(String token, String ids) {
