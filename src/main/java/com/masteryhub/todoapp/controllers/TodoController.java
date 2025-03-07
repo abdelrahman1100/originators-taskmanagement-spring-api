@@ -31,35 +31,65 @@ public class TodoController {
         return todoService.editTodo(token, todoDto);
     }
 
-    @DeleteMapping("/delete-todo")
-    public ResponseEntity<?> deleteTodo(@RequestHeader("Authorization") String token, @RequestHeader("id") Long id) {
+    @DeleteMapping("/hard-delete-todo")
+    public ResponseEntity<?> deleteTodo(@RequestHeader("Authorization") String token, @RequestParam("id") Long id) {
         return todoService.deleteTodo(token, id);
     }
 
     @GetMapping("/get-todo")
-    public ResponseEntity<?> getTodo(@RequestHeader("Authorization") String token, @RequestHeader("id") Long id) {
+    public ResponseEntity<?> getTodo(@RequestHeader("Authorization") String token, @RequestParam("id") Long id) {
         return todoService.getTodo(token, id);
     }
 
-    @DeleteMapping("/delete-all-todos")
+    @DeleteMapping("/hard-delete-all-todos")
     public ResponseEntity<?> deleteAllTodos(@RequestHeader("Authorization") String token) {
         return todoService.deleteAllTodos(token);
     }
 
     @GetMapping("/get-todos-by-status")
-    public ResponseEntity<?> getTodosByStatus(@RequestHeader("Authorization") String token, @RequestHeader("status") String status, @RequestParam(name = "page", defaultValue = "0") int page,
+    public ResponseEntity<?> getTodosByStatus(@RequestHeader("Authorization") String token, @RequestParam("status") String status, @RequestParam(name = "page", defaultValue = "0") int page,
                                               @RequestParam(name = "size", defaultValue = "10") int size) {
         return todoService.getTodosByStatus(token, status, page, size);
     }
 
-    @DeleteMapping("/delete-many-todos")
-    public ResponseEntity<?> deleteManyTodos(@RequestHeader("Authorization") String token, @RequestHeader("ids") String ids) {
+    @DeleteMapping("/hard-delete-many-todos")
+    public ResponseEntity<?> deleteManyTodos(@RequestHeader("Authorization") String token, @RequestParam("ids") String ids) {
         return todoService.deleteManyTodos(token, ids);
     }
 
     @PutMapping("/edit-many-todos")
     public ResponseEntity<?> editManyTodos(@RequestHeader("Authorization") String token, @RequestBody List<TodoDto> todoDtoList) {
         return todoService.editManyTodos(token, todoDtoList);
+    }
+
+    @DeleteMapping("/soft-delete-todo")
+    public ResponseEntity<?> softDeleteTodo(@RequestHeader("Authorization") String token, @RequestParam("id") Long id) {
+        return todoService.softDeleteTodo(token, id);
+    }
+
+    @DeleteMapping("/soft-delete-all-todo")
+    public ResponseEntity<?> softDeleteAllTodo(@RequestHeader("Authorization") String token) {
+        return todoService.softDeleteAllTodo(token);
+    }
+
+    @DeleteMapping("/soft-delete-many-todo")
+    public ResponseEntity<?> softDeleteManyTodo(@RequestHeader("Authorization") String token, @RequestParam("ids") String ids) {
+        return todoService.softDeleteManyTodo(token, ids);
+    }
+
+    @PutMapping("/restore-todo")
+    public ResponseEntity<?> restoreTodo(@RequestHeader("Authorization") String token, @RequestParam("id") Long id) {
+        return todoService.restoreTodo(token, id);
+    }
+
+    @PutMapping("/restore-all-todo")
+    public ResponseEntity<?> restoreAllTodo(@RequestHeader("Authorization") String token) {
+        return todoService.restoreAllTodo(token);
+    }
+
+    @PutMapping("/restore-many-todo")
+    public ResponseEntity<?> restoreManyTodo(@RequestHeader("Authorization") String token, @RequestParam("ids") String ids) {
+        return todoService.restoreManyTodo(token, ids);
     }
 
 }
