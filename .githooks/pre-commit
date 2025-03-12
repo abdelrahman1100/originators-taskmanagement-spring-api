@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Format all staged Java files using Spotless
+echo "🛠 Formatting Java files..."
+
+# Find staged Java files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.java$')
+
+if [ -n "$STAGED_FILES" ]; then
+    # Run Spotless to format Java files
+    mvn spotless:apply
+
+    # Re-stage formatted files
+    echo "$STAGED_FILES" | xargs git add
+fi
+
+echo "✅ Formatting complete."
+exit 0
