@@ -22,58 +22,64 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class AuthenticationService {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtGenerator jwtGenerator;
-    private final UserRepository userRepository;
-    private final TokenRepository tokenRepository;
-    private final PasswordEncoder passwordEncoder;
+  private final AuthenticationManager authenticationManager;
+  private final JwtGenerator jwtGenerator;
+  private final UserRepository userRepository;
+  private final TokenRepository tokenRepository;
+  private final PasswordEncoder passwordEncoder;
 
-    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtGenerator jwtGenerator, AuthenticationManager authenticationManager, TokenRepository tokenRepository) {
-        this.jwtGenerator = jwtGenerator;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
-        this.tokenRepository = tokenRepository;
+  public AuthenticationService(
+      UserRepository userRepository,
+      PasswordEncoder passwordEncoder,
+      JwtGenerator jwtGenerator,
+      AuthenticationManager authenticationManager,
+      TokenRepository tokenRepository) {
+    this.jwtGenerator = jwtGenerator;
+    this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.authenticationManager = authenticationManager;
+    this.tokenRepository = tokenRepository;
+  }
+
+  public ResponseEntity<String> registerUser(RegisterDTO registerDto) {
+    if (userRepository.existsByUsername(registerDto.getUsername())) {
+      return new ResponseEntity<>("Username is already taken!", HttpStatus.CONFLICT);
     }
-
-    public ResponseEntity<String> registerUser(RegisterDTO registerDto) {
-        if (userRepository.existsByUsername(registerDto.getUsername())) {
-            return new ResponseEntity<>("Username is already taken!", HttpStatus.CONFLICT);
-        }
-        if (registerDto.getUsername().length() < 3 || registerDto.getUsername().length() > 20) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username must be between 3 and 20 characters");
-        }
-        if (registerDto.getPassword().length() < 6 || registerDto.getPassword().length() > 40) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be between 6 and 40 characters");
-        }
-        UserEntity user = new UserEntity();
-        user.setUsername(registerDto.getUsername());
-        user.setPassword(passwordEncoder.encode((registerDto.getPassword())));
-
-        userRepository.save(user);
-
-        return new ResponseEntity<>("User registered successfully!", HttpStatus.OK);
+    if (registerDto.getUsername().length() < 3 || registerDto.getUsername().length() > 20) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Username must be between 3 and 20 characters");
     }
-
-    public ResponseEntity<?> authenticateUser(LoginDTO loginDto) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginDto.getUsername(),
-                            loginDto.getPassword()));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            String token = jwtGenerator.generateToken(authentication);
-            return new ResponseEntity<>(new AuthResponseDTO(token), HttpStatus.OK);
-        } catch (BadCredentialsException e) {
-            return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
-        }
+    if (registerDto.getPassword().length() < 6 || registerDto.getPassword().length() > 40) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Password must be between 6 and 40 characters");
     }
+    UserEntity user = new UserEntity();
+    user.setUsername(registerDto.getUsername());
+    user.setPassword(passwordEncoder.encode((registerDto.getPassword())));
 
-    public ResponseEntity<?> logout(String token) {
-        token = token.substring(7);
-        BlacklistedTokens blacklistedToken = new BlacklistedTokens(token);
-        tokenRepository.save(blacklistedToken);
-        return new ResponseEntity<>("User logged out successfully!", HttpStatus.OK);
+    userRepository.save(user);
+
+    return new ResponseEntity<>("User registered successfully!", HttpStatus.OK);
+  }
+
+  public ResponseEntity<?> authenticateUser(LoginDTO loginDto) {
+    try {
+      Authentication authentication =
+          authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(
+                  loginDto.getUsername(), loginDto.getPassword()));
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+      String token = jwtGenerator.generateToken(authentication);
+      return new ResponseEntity<>(new AuthResponseDTO(token), HttpStatus.OK);
+    } catch (BadCredentialsException e) {
+      return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
     }
+  }
 
+  public ResponseEntity<?> logout(String token) {
+    token = token.substring(7);
+    BlacklistedTokens blacklistedToken = new BlacklistedTokens(token);
+    tokenRepository.save(blacklistedToken);
+    return new ResponseEntity<>("User logged out successfully!", HttpStatus.OK);
+  }
 }

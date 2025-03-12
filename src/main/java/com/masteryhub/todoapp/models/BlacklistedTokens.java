@@ -7,13 +7,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @TypeAlias("BlacklistedTokens")
 public class BlacklistedTokens {
 
-        private String token;
+  private String token;
 
-        public BlacklistedTokens(String token) {
-            this.token = token;
-        }
+  public BlacklistedTokens(String token) {
+    this.token = token;
+  }
 
-        public String getToken() {
-            return token;
-        }
+  public String getToken() {
+    return token;
+  }
 }
