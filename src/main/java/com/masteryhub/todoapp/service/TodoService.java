@@ -64,16 +64,8 @@ public class TodoService {
     todo.setStatus(todoDto.getStatus());
     todo.setCreatedAt(Instant.now().toString());
     todo.setUpdatedAt(Instant.now().toString());
-    if (user.get().getTodolist() == null) {
-      todo.setId(1L);
-    } else {
-      todo.setId(user.get().getTodolist().size() + 1L);
-    }
-    if (user.get().getTodolist() == null) {
-      user.get().setTodolist(List.of(todo));
-    } else {
-      user.get().getTodolist().add(todo);
-    }
+    todo.setId(user.get().getTodolist().size() + 1L);
+    user.get().getTodolist().add(todo);
     userRepository.save(user.get());
     return new ResponseEntity<>("Todo created successfully", HttpStatus.OK);
   }

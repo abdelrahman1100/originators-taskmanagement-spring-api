@@ -28,7 +28,7 @@ public class SecurityConfig {
   public SecurityConfig(
       JwtAuthEntryPoint authEntryPoint, @Lazy CustomOAuth2SuccessHandler successHandler) {
     this.authEntryPoint = authEntryPoint;
-    this.successHandler = successHandler;
+    this.successHandler = new CustomOAuth2SuccessHandler(successHandler);
   }
 
   @Bean
@@ -72,6 +72,6 @@ public class SecurityConfig {
 
   @Bean
   public CustomOAuth2SuccessHandler customOAuth2SuccessHandler() {
-    return new CustomOAuth2SuccessHandler();
+    return new CustomOAuth2SuccessHandler(this.successHandler);
   }
 }
