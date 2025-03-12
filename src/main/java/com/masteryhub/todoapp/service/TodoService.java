@@ -202,9 +202,7 @@ public class TodoService {
         }
         List<TodoEntity> todos = user.get().getTodolist();
         todos.removeIf(todo -> idList.contains(todo.getId()));
-        userRepository.save(user.get());
-        return new ResponseEntity<>("Todos deleted successfully", HttpStatus.OK);
-    }
+        userRepository.save(user.get());return new ResponseEntity<>("Todos deleted successfully", HttpStatus.OK);}
 
     public ResponseEntity<?> editManyTodos(String token, List<TodoDto> todoDtoList) {
         token = token.substring(7);
