@@ -2,9 +2,6 @@ package com.masteryhub.todoapp.dto;
 
 import com.masteryhub.todoapp.models.Status;
 import com.masteryhub.todoapp.models.TodoEntity;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 
 public class TodoDto {
 
@@ -22,9 +19,6 @@ public class TodoDto {
 
   public TodoDto() {}
 
-  private static final DateTimeFormatter formatter =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("UTC"));
-
   public TodoDto(TodoEntity todoEntity) {
     this.id = todoEntity.getId();
     this.title = todoEntity.getTitle();
@@ -32,10 +26,6 @@ public class TodoDto {
     this.status = todoEntity.getStatus();
     this.createdAt = todoEntity.getCreatedAt();
     this.updatedAt = todoEntity.getCreatedAt();
-  }
-
-  private String formatInstant(Instant instant) {
-    return instant != null ? formatter.format(instant) : null;
   }
 
   public Long getId() {
