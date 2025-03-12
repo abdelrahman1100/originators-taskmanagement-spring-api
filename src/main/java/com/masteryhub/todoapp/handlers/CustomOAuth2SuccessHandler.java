@@ -23,6 +23,12 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
   @Autowired private JwtGenerator jwtGenerator;
   @Autowired private ObjectMapper objectMapper;
 
+  public CustomOAuth2SuccessHandler(CustomOAuth2SuccessHandler other) {
+    this.userRepository = other.userRepository;
+    this.jwtGenerator = other.jwtGenerator;
+    this.objectMapper = other.objectMapper;
+  }
+
   @Override
   public void onAuthenticationSuccess(
       HttpServletRequest request, HttpServletResponse response, Authentication authentication)
