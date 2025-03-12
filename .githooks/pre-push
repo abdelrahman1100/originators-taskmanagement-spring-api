@@ -8,24 +8,37 @@ echo "🚀 Running PMD..."
 PMD_OUTPUT=$(mvn pmd:check 2>&1)
 PMD_STATUS=$?
 
+# Extract PMD violations
+PMD_XML_PATH="target/pmd.xml"
+if [ -f "$PMD_XML_PATH" ]; then
+    echo "📄 Extracting PMD violations from $PMD_XML_PATH..."
+    PMD_ERRORS=$(xmllint --format "$PMD_XML_PATH" | grep -E "<violation" | sed -E 's/<violation.*>(.*)<\/violation>/\1/g')
+else
+    PMD_ERRORS="⚠️ PMD report not found. Check manually: $PMD_XML_PATH"
+fi
+
 # Run SpotBugs and capture output
 echo "🚀 Running SpotBugs..."
 SPOTBUGS_OUTPUT=$(mvn spotbugs:check 2>&1)
 SPOTBUGS_STATUS=$?
 
+# Extract SpotBugs warnings and errors
+SPOTBUGS_ERRORS=$(echo "$SPOTBUGS_OUTPUT" | grep -E "(Bug|ERROR|WARN)")
+
 # Check if PMD found issues
 if [ $PMD_STATUS -ne 0 ]; then
     echo "❌ PMD found issues:"
     echo "---------------------------------------------"
-    echo "$PMD_OUTPUT"  # Show full PMD output
+    echo "$PMD_ERRORS"
     echo "---------------------------------------------"
+    echo "📄 Check full PMD report: $PMD_XML_PATH"
 fi
 
 # Check if SpotBugs found issues
 if [ $SPOTBUGS_STATUS -ne 0 ]; then
     echo "❌ SpotBugs found issues:"
     echo "---------------------------------------------"
-    echo "$SPOTBUGS_OUTPUT"  # Show full SpotBugs output
+    echo "$SPOTBUGS_ERRORS"
     echo "---------------------------------------------"
 fi
 
