@@ -152,6 +152,11 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<java>
+						<googleJavaFormat/>
+					</java>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
