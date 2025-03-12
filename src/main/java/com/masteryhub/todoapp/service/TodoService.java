@@ -204,7 +204,7 @@ public class TodoService {
         todos.removeIf(todo -> idList.contains(todo.getId()));
         userRepository.save(user.get());return new ResponseEntity<>("Todos deleted successfully", HttpStatus.OK);}
 
-    public ResponseEntity<?> editManyTodos(String token, List<TodoDto> todoDtoList) {
+    public ResponseEntity<?>            editManyTodos(String token, List<TodoDto> todoDtoList) {
         token = token.substring(7);
         String username = jwtGenerator.getUsernameFromJWT(token);
         Optional<UserEntity> user = userRepository.findByUsername(username);
