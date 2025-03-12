@@ -1,0 +1,39 @@
+#!/bin/sh
+
+echo "🔍 Running PMD and SpotBugs before pushing..."
+echo "============================================="
+
+# Run PMD and capture output
+echo "🚀 Running PMD..."
+PMD_OUTPUT=$(mvn pmd:check 2>&1)
+PMD_STATUS=$?
+
+# Run SpotBugs and capture output
+echo "🚀 Running SpotBugs..."
+SPOTBUGS_OUTPUT=$(mvn spotbugs:check 2>&1)
+SPOTBUGS_STATUS=$?
+
+# Check if PMD found issues
+if [ $PMD_STATUS -ne 0 ]; then
+    echo "❌ PMD found issues:"
+    echo "---------------------------------------------"
+    echo "$PMD_OUTPUT"  # Show full PMD output
+    echo "---------------------------------------------"
+fi
+
+# Check if SpotBugs found issues
+if [ $SPOTBUGS_STATUS -ne 0 ]; then
+    echo "❌ SpotBugs found issues:"
+    echo "---------------------------------------------"
+    echo "$SPOTBUGS_OUTPUT"  # Show full SpotBugs output
+    echo "---------------------------------------------"
+fi
+
+# If any issues are found, reject the push
+if [ $PMD_STATUS -ne 0 ] || [ $SPOTBUGS_STATUS -ne 0 ]; then
+    echo "❌ Pre-push rejected due to code issues detected by PMD or SpotBugs."
+    exit 1
+fi
+
+echo "✅ No issues found. Pushing code..."
+exit 0
