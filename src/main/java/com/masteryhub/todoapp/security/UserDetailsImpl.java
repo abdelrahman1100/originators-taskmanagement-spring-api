@@ -29,11 +29,7 @@ public class UserDetailsImpl implements UserDetails {
     this.username = username;
     this.email = email;
     this.password = password;
-    // Create a defensive copy of the authorities collection and make it immutable
-    this.authorities =
-        authorities == null
-            ? Collections.emptyList()
-            : List.copyOf(authorities); // Create an immutable copy
+    this.authorities = authorities == null ? Collections.emptyList() : List.copyOf(authorities);
     this.__v = __v;
   }
 
