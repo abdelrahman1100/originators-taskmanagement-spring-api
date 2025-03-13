@@ -48,7 +48,7 @@ public class UserDetailsImpl implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return authorities;
+    return Collections.unmodifiableList(authorities);
   }
 
   @Override
