@@ -1,7 +1,8 @@
 package com.masteryhub.todoapp.controllers;
 
-import com.masteryhub.todoapp.dto.LoginDTO;
-import com.masteryhub.todoapp.dto.RegisterDTO;
+import com.masteryhub.todoapp.dto.AuthenticationResponseDto;
+import com.masteryhub.todoapp.dto.LoginDto;
+import com.masteryhub.todoapp.dto.RegisterDto;
 import com.masteryhub.todoapp.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -19,17 +20,17 @@ public class AuthenticationController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) {
+  public ResponseEntity<AuthenticationResponseDto> login(@RequestBody LoginDto loginDto) {
     return authenticationService.authenticateUser(loginDto);
   }
 
   @PostMapping("/register")
-  public ResponseEntity<?> register(@RequestBody RegisterDTO registerDto) {
+  public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
     return authenticationService.registerUser(registerDto);
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
+  public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
     return authenticationService.logout(token);
   }
 

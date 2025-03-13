@@ -1,22 +1,19 @@
 package com.masteryhub.todoapp.dto;
 
-public class RegisterDTO {
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
+public class RegisterDto {
   private String username;
+
+  @Size(min = 8, message = "Password must be at least 8 characters long")
+  @Pattern(
+      regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+      message =
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
   private String password;
-
-  public String getUsername() {
-    return username;
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-  }
 }

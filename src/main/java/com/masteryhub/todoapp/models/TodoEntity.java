@@ -1,84 +1,52 @@
 package com.masteryhub.todoapp.models;
 
+import com.masteryhub.todoapp.dto.RequestTodoDto;
+import java.time.Instant;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+@Document(collection = "todo")
+@TypeAlias("Todo")
+@Setter
+@Getter
+@NoArgsConstructor
 public class TodoEntity {
 
-  private Long id;
+  @Id private String id;
+
+  private Long customId;
+
   private String title;
+
   private String description;
+
   private Status status;
+
+  public TodoEntity(RequestTodoDto requestTodoDto) {
+    this.title = requestTodoDto.getTitle();
+    this.description = requestTodoDto.getDescription();
+    this.status = requestTodoDto.getStatus();
+    this.dueDate = requestTodoDto.getDueDate();
+  }
 
   @CreatedDate
   @Field("created_at")
-  private String createdAt;
+  private Instant createdAt;
 
   @LastModifiedDate
   @Field("updated_at")
-  private String updatedAt;
+  private Instant updatedAt;
 
   @Field("deleted_at")
-  private String deletedAt;
+  private Instant deletedAt;
 
-  public boolean isDeleted() {
-    return deletedAt != null;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public Status getStatus() {
-    return status;
-  }
-
-  public void setStatus(Status status) {
-    this.status = status;
-  }
-
-  public String getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(String createdAt) {
-    this.createdAt = createdAt;
-  }
-
-  public String getUpdatedAt() {
-    return updatedAt;
-  }
-
-  public void setUpdatedAt(String updatedAt) {
-    this.updatedAt = updatedAt;
-  }
-
-  public String getDeletedAt() {
-    return deletedAt;
-  }
-
-  public void setDeletedAt(String deletedAt) {
-    this.deletedAt = deletedAt;
-  }
+  @Field("due_date")
+  private Instant dueDate;
 }

@@ -9,5 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuthenticationResponseDto {
   private String accessToken;
-  private final String tokenType = "Bearer ";
+  private static String tokenType = "Bearer ";
 }
