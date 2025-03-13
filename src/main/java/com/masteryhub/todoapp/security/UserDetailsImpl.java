@@ -29,7 +29,10 @@ public class UserDetailsImpl implements UserDetails {
     this.username = username;
     this.email = email;
     this.password = password;
-    this.authorities = authorities == null ? Collections.emptyList() : List.copyOf(authorities);
+    this.authorities =
+        authorities == null
+            ? Collections.emptyList()
+            : Collections.unmodifiableList(List.copyOf(authorities));
     this.__v = __v;
   }
 
