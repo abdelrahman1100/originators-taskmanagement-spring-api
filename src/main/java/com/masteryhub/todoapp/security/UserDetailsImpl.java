@@ -2,6 +2,7 @@ package com.masteryhub.todoapp.security;
 
 import com.masteryhub.todoapp.models.UserEntity;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,24 +15,37 @@ public class UserDetailsImpl implements UserDetails {
   private final String username;
   private final String email;
   private final String password;
+  private final List<GrantedAuthority> authorities;
   private final Integer __v;
 
-  public UserDetailsImpl(String id, String username, String email, String password, Integer __v) {
+  public UserDetailsImpl(
+      String id,
+      String username,
+      String email,
+      String password,
+      Collection<? extends GrantedAuthority> authorities,
+      Integer __v) {
     this.id = id;
     this.username = username;
     this.email = email;
     this.password = password;
+    this.authorities = authorities == null ? Collections.emptyList() : List.copyOf(authorities);
     this.__v = __v;
   }
 
   public static UserDetailsImpl build(UserEntity user) {
     return new UserDetailsImpl(
-        user.getId(), user.getUsername(), user.getEmail(), user.getPassword(), user.get__v());
+        user.getId(),
+        user.getUsername(),
+        user.getEmail(),
+        user.getPassword(),
+        Collections.emptyList(),
+        user.get__v());
   }
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of();
+    return authorities;
   }
 
   @Override
