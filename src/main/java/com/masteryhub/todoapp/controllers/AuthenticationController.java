@@ -5,8 +5,10 @@ import com.masteryhub.todoapp.dto.LoginDto;
 import com.masteryhub.todoapp.dto.RegisterDto;
 import com.masteryhub.todoapp.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,8 +27,9 @@ public class AuthenticationController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
-    return authenticationService.registerUser(registerDto);
+  public ResponseEntity<String> register(
+      @Valid @RequestBody RegisterDto registerDto, BindingResult result) {
+    return authenticationService.registerUser(registerDto, result);
   }
 
   @PostMapping("/logout")

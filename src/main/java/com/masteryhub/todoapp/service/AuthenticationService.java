@@ -7,6 +7,7 @@ import com.masteryhub.todoapp.models.UserEntity;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtGenerator;
 import com.masteryhub.todoapp.security.UserDetailsImpl;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 @Service
 public class AuthenticationService {
@@ -36,12 +38,11 @@ public class AuthenticationService {
     this.authenticationManager = authenticationManager;
   }
 
-  public ResponseEntity<String> registerUser(RegisterDto registerDto) {
-    if (registerDto.getUsername().isEmpty() || registerDto.getPassword().isEmpty()) {
-      return new ResponseEntity<>("Username and Password can't be empty!", HttpStatus.BAD_REQUEST);
-    }
-    if (registerDto.getUsername().length() < 4) {
-      return new ResponseEntity<>("Username is too short", HttpStatus.BAD_REQUEST);
+  public ResponseEntity<String> registerUser(RegisterDto registerDto, BindingResult result) {
+    List<String> errors =
+        result.getFieldErrors().stream().map(error -> error.getDefaultMessage()).toList();
+    if (!errors.isEmpty()) {
+      return ResponseEntity.badRequest().body(String.join("\n", errors));
     }
     if (userRepository.existsByUsername(registerDto.getUsername())) {
       return new ResponseEntity<>("Username is already taken!", HttpStatus.CONFLICT);

@@ -8,6 +8,7 @@ import com.masteryhub.todoapp.models.UserEntity;
 import com.masteryhub.todoapp.repository.TodoRepository;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtGenerator;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +58,9 @@ public class TodoService {
     }
     ResponseTodoDto userTodos =
         todos.stream()
-            .filter(todo -> user.get().getTodosIds().contains(todo.getId()))
+            .filter(
+                todo ->
+                    user.get().getTodosIds().contains(todo.getId()) && todo.getDeletedAt() == null)
             .findFirst()
             .map(ResponseTodoDto::from)
             .orElse(null);
@@ -71,7 +74,7 @@ public class TodoService {
     if (page > 0) page--;
     List<String> todoIds = user.get().getTodosIds();
     Pageable pageable = PageRequest.of(page, size);
-    Page<TodoEntity> todoPage = todoRepository.findAllByIdIn(todoIds, pageable);
+    Page<TodoEntity> todoPage = todoRepository.findAllByIdInAndDeletedAtIsNull(todoIds, pageable);
     Page<ResponseTodoDto> responsePage = todoPage.map(ResponseTodoDto::from);
     return new ResponseEntity<>(responsePage.getContent(), HttpStatus.OK);
   }
@@ -86,7 +89,8 @@ public class TodoService {
     List<String> todosids = user.get().getTodosIds();
     if (page > 0) page--;
     Pageable pageable = PageRequest.of(page, size);
-    Page<TodoEntity> todoPage = todoRepository.findByIdInAndStatus(todosids, statusEnum, pageable);
+    Page<TodoEntity> todoPage =
+        todoRepository.findByIdInAndStatusAndDeletedAtIsNull(todosids, statusEnum, pageable);
     return ResponseEntity.ok(todoPage.map(ResponseTodoDto::from).getContent());
   }
 
@@ -97,7 +101,7 @@ public class TodoService {
     List<String> todosids = user.get().getTodosIds();
     TodoEntity todoRes =
         todoRepository.findByCustomId(requestTodoDto.getCustomId()).stream()
-            .filter(todo -> todosids.contains(todo.getId()))
+            .filter(todo -> todosids.contains(todo.getId().toString()))
             .findFirst()
             .orElse(null);
     if (todoRes == null) {
@@ -106,7 +110,6 @@ public class TodoService {
     todoRes.setTitle(requestTodoDto.getTitle());
     todoRes.setDescription(requestTodoDto.getDescription());
     todoRes.setStatus(requestTodoDto.getStatus());
-    todoRes.setDueDate(requestTodoDto.getDueDate());
     todoRepository.save(todoRes);
     return new ResponseEntity<>(ResponseTodoDto.from(todoRes), HttpStatus.OK);
   }
@@ -119,9 +122,10 @@ public class TodoService {
     List<String> todosids = user.get().getTodosIds();
     List<Long> requestedTodoIds = todoDtoList.stream().map(RequestTodoDto::getCustomId).toList();
     List<TodoEntity> todos =
-        todoRepository.findAllByCustomId(requestedTodoIds).stream()
-            .filter(todo -> todosids.contains(todo.getId()))
+        todoRepository.findAllByCustomIdIn(requestedTodoIds).stream()
+            .filter(todo -> todosids.contains(todo.getId().toString()))
             .toList();
+    System.out.println(todos);
     if (todos.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
@@ -131,7 +135,6 @@ public class TodoService {
           todo.setTitle(todoDto.getTitle());
           todo.setDescription(todoDto.getDescription());
           todo.setStatus(todoDto.getStatus());
-          todo.setDueDate(todoDto.getDueDate());
         }
       }
     }
@@ -174,7 +177,7 @@ public class TodoService {
             .collect(Collectors.toList());
     List<String> todosids = user.get().getTodosIds();
     List<TodoEntity> todoRes =
-        todoRepository.findAllByCustomId(idList).stream()
+        todoRepository.findAllByCustomIdIn(idList).stream()
             .filter(todo -> todosids.contains(todo.getId()))
             .toList();
     if (todoRes.isEmpty()) {
@@ -205,125 +208,126 @@ public class TodoService {
     return new ResponseEntity<>("All todos deleted successfully", HttpStatus.OK);
   }
 
-  //    public ResponseEntity<?> softDeleteTodo(String token, Long id) {
-  //        token = token.substring(7);
-  //        String username = jwtGenerator.getUsernameFromJWT(token);
-  //        Optional<UserEntity> user = userRepository.findByUsername(username);
-  //        if (user.isEmpty()) {
-  //            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-  //        }
-  //        List<TodoEntity> todos = user.get().getTodoListIds();
-  //        for (TodoEntity todo : todos) {
-  //            if (todo.getCustomId().equals(id)) {
-  //                todo.setDeletedAt(Instant.now().toString());
-  //                userRepository.save(user.get());
-  //                return new ResponseEntity<>("Todo soft deleted successfully", HttpStatus.OK);
-  //            }
-  //        }
-  //        return new ResponseEntity<>("Todo not found", HttpStatus.BAD_REQUEST);
-  //    }
-  //
-  //    public ResponseEntity<?> softDeleteAllTodo(String token) {
-  //        token = token.substring(7);
-  //        String username = jwtGenerator.getUsernameFromJWT(token);
-  //        Optional<UserEntity> user = userRepository.findByUsername(username);
-  //        if (user.isEmpty()) {
-  //            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-  //        }
-  //        List<TodoEntity> todos = user.get().getTodoListIds();
-  //        for (TodoEntity todo : todos) {
-  //            todo.setDeletedAt(Instant.now().toString());
-  //        }
-  //        userRepository.save(user.get());
-  //        return new ResponseEntity<>("All todos soft deleted successfully", HttpStatus.OK);
-  //    }
-  //
-  //    public ResponseEntity<?> softDeleteManyTodo(String token, String ids) {
-  //        token = token.substring(7);
-  //        String username = jwtGenerator.getUsernameFromJWT(token);
-  //        Optional<UserEntity> user = userRepository.findByUsername(username);
-  //        if (user.isEmpty()) {
-  //            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-  //        }
-  //        List<Long> idList;
-  //        try {
-  //            idList =
-  //                    Arrays.stream(ids.split(","))
-  //                            .map(String::trim) // Remove spaces
-  //                            .map(Long::parseLong) // Convert to Long
-  //                            .collect(Collectors.toList());
-  //        } catch (NumberFormatException e) {
-  //            return new ResponseEntity<>(
-  //                    "Invalid ID format. IDs must be numbers.", HttpStatus.BAD_REQUEST);
-  //        }
-  //        List<TodoEntity> todos = user.get().getTodoListIds();
-  //        for (TodoEntity todo : todos) {
-  //            if (idList.contains(todo.getCustomId())) {
-  //                todo.setDeletedAt(Instant.now().toString());
-  //            }
-  //        }
-  //        userRepository.save(user.get());
-  //        return new ResponseEntity<>("All todos soft deleted successfully", HttpStatus.OK);
-  //    }
-  //
-  //    public ResponseEntity<?> restoreTodo(String token, Long id) {
-  //        token = token.substring(7);
-  //        String username = jwtGenerator.getUsernameFromJWT(token);
-  //        Optional<UserEntity> user = userRepository.findByUsername(username);
-  //        if (user.isEmpty()) {
-  //            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-  //        }
-  //        List<TodoEntity> todos = user.get().getTodoListIds();
-  //        for (TodoEntity todo : todos) {
-  //            if (todo.getCustomId().equals(id)) {
-  //                todo.setDeletedAt(null);
-  //                userRepository.save(user.get());
-  //                return new ResponseEntity<>("Todo restored successfully", HttpStatus.OK);
-  //            }
-  //        }
-  //        return new ResponseEntity<>("Todo not found", HttpStatus.BAD_REQUEST);
-  //    }
-  //
-  //    public ResponseEntity<?> restoreAllTodo(String token) {
-  //        token = token.substring(7);
-  //        String username = jwtGenerator.getUsernameFromJWT(token);
-  //        Optional<UserEntity> user = userRepository.findByUsername(username);
-  //        if (user.isEmpty()) {
-  //            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-  //        }
-  //        List<TodoEntity> todos = user.get().getTodoListIds();
-  //        for (TodoEntity todo : todos) {
-  //            todo.setDeletedAt(null);
-  //        }
-  //        userRepository.save(user.get());
-  //        return new ResponseEntity<>("All todos restored successfully", HttpStatus.OK);
-  //    }
-  //
-  //    public ResponseEntity<?> restoreManyTodo(String token, String ids) {
-  //        token = token.substring(7);
-  //        String username = jwtGenerator.getUsernameFromJWT(token);
-  //        Optional<UserEntity> user = userRepository.findByUsername(username);
-  //        if (user.isEmpty()) {
-  //            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-  //        }
-  //        List<Long> idList;
-  //        try {
-  //            idList =
-  //                    Arrays.stream(ids.split(","))
-  //                            .map(String::trim) // Remove spaces
-  //                            .map(Long::parseLong) // Convert to Long
-  //                            .collect(Collectors.toList());
-  //        } catch (NumberFormatException e) {
-  //            return new ResponseEntity<>(
-  //                    "Invalid ID format. IDs must be numbers.", HttpStatus.BAD_REQUEST);
-  //        }
-  //        List<TodoEntity> todos = user.get().getTodoListIds();
-  //        for (TodoEntity todo : todos) {
-  //            if (idList.contains(todo.getCustomId())) {
-  //                todo.setDeletedAt(null);
-  //            }
-  //        }
-  //        userRepository.save(user.get());
-  //        return new ResponseEntity<>("All todos restored successfully", HttpStatus.OK);
-  //    }
+  public ResponseEntity<String> softDeleteTodo(String token, Long id) {
+    token = token.substring(7);
+    String username = jwtGenerator.getUsernameFromJWT(token);
+    Optional<UserEntity> user = userRepository.findByUsername(username);
+    List<String> todosids = user.get().getTodosIds();
+    TodoEntity todoRes =
+        todoRepository.findByCustomId(id).stream()
+            .filter(todo -> todosids.contains(todo.getId()))
+            .findFirst()
+            .orElse(null);
+    if (todoRes == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    todoRes.setDeletedAt(Instant.now());
+    todoRepository.save(todoRes);
+    return new ResponseEntity<>("Todo soft deleted successfully", HttpStatus.OK);
+  }
+
+  public ResponseEntity<String> softDeleteManyTodo(String token, String ids) {
+    token = token.substring(7);
+    String username = jwtGenerator.getUsernameFromJWT(token);
+    Optional<UserEntity> user = userRepository.findByUsername(username);
+    List<Long> idList;
+    idList =
+        Arrays.stream(ids.split(","))
+            .map(String::trim)
+            .map(Long::parseLong)
+            .collect(Collectors.toList());
+    List<String> todosids = user.get().getTodosIds();
+    List<TodoEntity> todoRes =
+        todoRepository.findAllByCustomIdIn(idList).stream()
+            .filter(todo -> todosids.contains(todo.getId()))
+            .toList();
+    if (todoRes.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    for (TodoEntity todo : todoRes) {
+      todo.setDeletedAt(Instant.now());
+    }
+    todoRepository.saveAll(todoRes);
+    return new ResponseEntity<>("Many todos soft deleted successfully", HttpStatus.OK);
+  }
+
+  public ResponseEntity<String> softDeleteAllTodo(String token) {
+    token = token.substring(7);
+    String username = jwtGenerator.getUsernameFromJWT(token);
+    Optional<UserEntity> user = userRepository.findByUsername(username);
+    List<String> todosids = user.get().getTodosIds();
+    List<TodoEntity> todoRes = todoRepository.findAllById(todosids);
+    if (todoRes.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    for (TodoEntity todo : todoRes) {
+      todo.setDeletedAt(Instant.now());
+    }
+    todoRepository.saveAll(todoRes);
+    return new ResponseEntity<>("All todos soft deleted successfully", HttpStatus.OK);
+  }
+
+  public ResponseEntity<ResponseTodoDto> restoreTodo(String token, Long id) {
+    token = token.substring(7);
+    String username = jwtGenerator.getUsernameFromJWT(token);
+    Optional<UserEntity> user = userRepository.findByUsername(username);
+    List<TodoEntity> todos = todoRepository.findByCustomId(id);
+    if (todos.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    TodoEntity userTodo =
+        todos.stream()
+            .filter(
+                todo ->
+                    user.get().getTodosIds().contains(todo.getId()) && todo.getDeletedAt() != null)
+            .findFirst()
+            .orElse(null);
+    if (userTodo == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    userTodo.setDeletedAt(null);
+    todoRepository.save(userTodo);
+    ResponseTodoDto userTodos = ResponseTodoDto.from(userTodo);
+    return new ResponseEntity<>(userTodos, HttpStatus.OK);
+  }
+
+  public ResponseEntity<List<ResponseTodoDto>> restoreManyTodo(String token, String ids) {
+    token = token.substring(7);
+    String username = jwtGenerator.getUsernameFromJWT(token);
+    Optional<UserEntity> user = userRepository.findByUsername(username);
+    List<Long> idList =
+        Arrays.stream(ids.split(","))
+            .map(String::trim)
+            .map(Long::parseLong)
+            .collect(Collectors.toList());
+    List<String> todosids = user.get().getTodosIds();
+    List<TodoEntity> todos =
+        todoRepository.findAllByCustomIdIn(idList).stream()
+            .filter(todo -> todosids.contains(todo.getId()))
+            .toList();
+    if (todos.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    for (TodoEntity todo : todos) {
+      todo.setDeletedAt(null);
+    }
+    todoRepository.saveAll(todos);
+    List<ResponseTodoDto> responseDtos = todos.stream().map(ResponseTodoDto::from).toList();
+    return new ResponseEntity<>(responseDtos, HttpStatus.OK);
+  }
+
+  public ResponseEntity<List<ResponseTodoDto>> restoreAllTodo(String token) {
+    token = token.substring(7);
+    String username = jwtGenerator.getUsernameFromJWT(token);
+    Optional<UserEntity> user = userRepository.findByUsername(username);
+    List<String> todosids = user.get().getTodosIds();
+    List<TodoEntity> todos = todoRepository.findAllById(todosids);
+    for (TodoEntity todo : todos) {
+      todo.setDeletedAt(null);
+    }
+    todoRepository.saveAll(todos);
+    userRepository.save(user.get());
+    List<ResponseTodoDto> responseDtos = todos.stream().map(ResponseTodoDto::from).toList();
+    return new ResponseEntity<>(responseDtos, HttpStatus.OK);
+  }
 }
