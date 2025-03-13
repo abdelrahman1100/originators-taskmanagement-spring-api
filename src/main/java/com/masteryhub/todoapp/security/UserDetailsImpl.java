@@ -49,8 +49,7 @@ public class UserDetailsImpl implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    // Return a new copy of the authorities list to ensure immutability
-    return List.copyOf(authorities);
+    return Collections.unmodifiableList(authorities);
   }
 
   @Override
