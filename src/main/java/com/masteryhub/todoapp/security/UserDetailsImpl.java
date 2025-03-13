@@ -30,8 +30,8 @@ public class UserDetailsImpl implements UserDetails {
     this.email = email;
     this.password = password;
     this.authorities =
-        authorities == null
-            ? Collections.emptyList() // Ensure immutability even if null
+        (authorities == null || authorities.isEmpty())
+            ? Collections.emptyList()
             : Collections.unmodifiableList(new ArrayList<>(authorities));
     this.__v = __v;
   }
@@ -42,12 +42,13 @@ public class UserDetailsImpl implements UserDetails {
         user.getUsername(),
         user.getEmail(),
         user.getPassword(),
-        Collections.emptySet(),
+        Collections.emptyList(),
         user.get__v());
   }
 
+  @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return Collections.unmodifiableCollection(authorities);
+    return authorities;
   }
 
   @Override
