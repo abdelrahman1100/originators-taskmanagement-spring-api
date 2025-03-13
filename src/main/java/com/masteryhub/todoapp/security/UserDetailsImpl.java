@@ -29,7 +29,10 @@ public class UserDetailsImpl implements UserDetails {
     this.username = username;
     this.email = email;
     this.password = password;
-    this.authorities = Collections.unmodifiableList(new ArrayList<>(authorities));
+    this.authorities =
+        authorities == null
+            ? Collections.emptyList() // Ensure immutability even if null
+            : Collections.unmodifiableList(new ArrayList<>(authorities));
     this.__v = __v;
   }
 
