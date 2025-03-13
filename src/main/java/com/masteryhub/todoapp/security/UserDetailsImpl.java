@@ -35,7 +35,12 @@ public class UserDetailsImpl implements UserDetails {
 
   public static UserDetailsImpl build(UserEntity user) {
     return new UserDetailsImpl(
-        user.getId(), user.getUsername(), user.getEmail(), user.getPassword(), null, user.get__v());
+        user.getId(),
+        user.getUsername(),
+        user.getEmail(),
+        user.getPassword(),
+        Collections.emptySet(),
+        user.get__v());
   }
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
