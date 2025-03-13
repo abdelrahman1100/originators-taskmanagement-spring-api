@@ -29,10 +29,11 @@ public class UserDetailsImpl implements UserDetails {
     this.username = username;
     this.email = email;
     this.password = password;
+    // Create a defensive copy of the authorities collection and make it immutable
     this.authorities =
         authorities == null
             ? Collections.emptyList()
-            : Collections.unmodifiableList(List.copyOf(authorities));
+            : List.copyOf(authorities); // Create an immutable copy
     this.__v = __v;
   }
 
@@ -48,7 +49,8 @@ public class UserDetailsImpl implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return Collections.unmodifiableList(authorities);
+    // Return a new copy of the authorities list to ensure immutability
+    return List.copyOf(authorities);
   }
 
   @Override
