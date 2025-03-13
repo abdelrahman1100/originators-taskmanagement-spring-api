@@ -1,6 +1,7 @@
 package com.masteryhub.todoapp.security;
 
 import com.masteryhub.todoapp.models.UserEntity;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import lombok.Getter;
@@ -28,7 +29,7 @@ public class UserDetailsImpl implements UserDetails {
     this.username = username;
     this.email = email;
     this.password = password;
-    this.authorities = authorities;
+    this.authorities = Collections.unmodifiableList(new ArrayList<>(authorities));
     this.__v = __v;
   }
 
