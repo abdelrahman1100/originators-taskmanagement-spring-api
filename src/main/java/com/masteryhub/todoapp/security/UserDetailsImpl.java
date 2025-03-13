@@ -4,6 +4,7 @@ import com.masteryhub.todoapp.models.UserEntity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,7 +16,7 @@ public class UserDetailsImpl implements UserDetails {
   private final String username;
   private final String email;
   private final String password;
-  private final Collection<? extends GrantedAuthority> authorities;
+  private final List<GrantedAuthority> authorities;
   private final Integer __v;
 
   public UserDetailsImpl(
