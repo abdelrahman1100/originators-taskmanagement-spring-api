@@ -10,48 +10,51 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JwtGenerator {
-  private static final String SECRET_KEY = SecurityConstants.SECRET_KEY;
+
+  private final SecurityConstants securityConstants;
+  private final SecretKey signingKey;
+
+  public JwtGenerator(SecurityConstants securityConstants) {
+    this.securityConstants = securityConstants;
+    byte[] keyBytes = Decoders.BASE64.decode(securityConstants.getSecretKey());
+    this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+  }
 
   public String generateToken(UserDetailsImpl userDetails) {
+    System.out.println("SECRET_KEY: " + securityConstants.getSecretKey());
     String username = userDetails.getUsername();
     Integer versionToken = userDetails.get__v();
     Date currentDate = new Date();
-    Date expireDate = new Date(currentDate.getTime() + SecurityConstants.JWT_EXPIRATION);
+    Date expireDate = new Date(currentDate.getTime() + securityConstants.getJwtExpiration());
 
-    String token =
-        Jwts.builder()
-            .setSubject(username)
-            .claim("versionToken", versionToken)
-            .setIssuedAt(new Date())
-            .setExpiration(expireDate)
-            .signWith(getSigningKey())
-            .compact();
-    return token;
+    return Jwts.builder()
+        .setSubject(username)
+        .claim("versionToken", versionToken)
+        .setIssuedAt(currentDate)
+        .setExpiration(expireDate)
+        .signWith(signingKey)
+        .compact();
   }
 
   public String getUsernameFromJWT(String token) {
     Claims claims =
-        Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+        Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token).getBody();
     return claims.getSubject();
   }
 
   public Integer getVersionToken(String token) {
     Claims claims =
-        Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
+        Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token).getBody();
     return claims.get("versionToken", Integer.class);
   }
 
   public boolean validateToken(String token) {
     try {
-      Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parseClaimsJws(token);
-      return true;
+      Claims claims =
+          Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token).getBody();
+      return !claims.getExpiration().before(new Date());
     } catch (Exception ex) {
       return false;
     }
-  }
-
-  private SecretKey getSigningKey() {
-    byte[] KeyBytes = Decoders.BASE64.decode(SECRET_KEY);
-    return Keys.hmacShaKeyFor(KeyBytes);
   }
 }
