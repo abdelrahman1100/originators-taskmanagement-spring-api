@@ -33,6 +33,7 @@ public class TodoEntity {
     this.title = requestTodoDto.getTitle();
     this.description = requestTodoDto.getDescription();
     this.status = requestTodoDto.getStatus();
+    this.dueDate = requestTodoDto.getDueDate();
   }
 
   @CreatedDate
