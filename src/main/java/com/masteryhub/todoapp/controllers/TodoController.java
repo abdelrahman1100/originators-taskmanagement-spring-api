@@ -116,4 +116,12 @@ public class TodoController {
       @RequestBody DueDateDto dueDate) {
     return todoService.setDueDate(token, id, dueDate);
   }
+
+  @PatchMapping("/set-tags")
+  public ResponseEntity<ResponseTodoDto> setTags(
+      @RequestHeader("Authorization") String token,
+      @RequestParam("id") Long id,
+      @RequestBody List<String> tags) {
+    return todoService.setTags(token, id, tags);
+  }
 }

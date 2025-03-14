@@ -1,8 +1,10 @@
 package com.masteryhub.todoapp.dto;
 
 import com.masteryhub.todoapp.models.Status;
+import com.masteryhub.todoapp.models.Tags;
 import com.masteryhub.todoapp.models.TodoEntity;
 import java.time.Instant;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +28,8 @@ public class ResponseTodoDto {
 
   private Instant dueDate;
 
+  private List<Tags> tags;
+
   public static ResponseTodoDto from(TodoEntity todo) {
     return new ResponseTodoDto(
         todo.getCustomId(),
@@ -34,6 +38,7 @@ public class ResponseTodoDto {
         todo.getStatus(),
         todo.getCreatedAt(),
         todo.getUpdatedAt(),
-        todo.getDueDate());
+        todo.getDueDate(),
+        todo.getTags());
   }
 }
