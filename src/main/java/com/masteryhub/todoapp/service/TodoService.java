@@ -10,8 +10,10 @@ import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtGenerator;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -160,6 +162,13 @@ public class TodoService {
     user.get().removeTodoId(todoRes.getId());
     userRepository.save(user.get());
     todoRepository.delete(todoRes);
+    List<TodoEntity> remainingTodos =
+        todoRepository.findAll().stream()
+            .sorted(Comparator.comparing(TodoEntity::getCreatedAt))
+            .toList();
+    AtomicLong counter = new AtomicLong(1);
+    remainingTodos.forEach(todo -> todo.setCustomId(counter.getAndIncrement()));
+    todoRepository.saveAll(remainingTodos);
     return new ResponseEntity<>("Todo deleted successfully", HttpStatus.OK);
   }
 
@@ -188,6 +197,13 @@ public class TodoService {
       todoRepository.delete(todo);
     }
     userRepository.save(user.get());
+    List<TodoEntity> remainingTodos =
+        todoRepository.findAll().stream()
+            .sorted(Comparator.comparing(TodoEntity::getCreatedAt))
+            .toList();
+    AtomicLong counter = new AtomicLong(1);
+    remainingTodos.forEach(todo -> todo.setCustomId(counter.getAndIncrement()));
+    todoRepository.saveAll(remainingTodos);
     return new ResponseEntity<>("Todos deleted successfully", HttpStatus.OK);
   }
 
@@ -205,6 +221,13 @@ public class TodoService {
     }
     user.get().clearTodosIds();
     userRepository.save(user.get());
+    List<TodoEntity> remainingTodos =
+        todoRepository.findAll().stream()
+            .sorted(Comparator.comparing(TodoEntity::getCreatedAt))
+            .toList();
+    AtomicLong counter = new AtomicLong(1);
+    remainingTodos.forEach(todo -> todo.setCustomId(counter.getAndIncrement()));
+    todoRepository.saveAll(remainingTodos);
     return new ResponseEntity<>("All todos deleted successfully", HttpStatus.OK);
   }
 
