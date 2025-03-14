@@ -1,6 +1,7 @@
 package com.masteryhub.todoapp.dto;
 
 import com.masteryhub.todoapp.models.Status;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,4 +16,6 @@ public class RequestTodoDto {
   private String description;
 
   private Status status;
+
+  private Instant dueDate;
 }

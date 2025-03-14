@@ -24,6 +24,8 @@ public class ResponseTodoDto {
 
   private Instant updatedAt;
 
+  private Instant dueDate;
+
   public static ResponseTodoDto from(TodoEntity todo) {
     return new ResponseTodoDto(
         todo.getCustomId(),
@@ -31,6 +33,7 @@ public class ResponseTodoDto {
         todo.getDescription(),
         todo.getStatus(),
         todo.getCreatedAt(),
-        todo.getUpdatedAt());
+        todo.getUpdatedAt(),
+        todo.getDueDate());
   }
 }

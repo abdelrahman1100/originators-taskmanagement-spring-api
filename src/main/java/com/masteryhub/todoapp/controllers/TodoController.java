@@ -1,5 +1,6 @@
 package com.masteryhub.todoapp.controllers;
 
+import com.masteryhub.todoapp.dto.DueDateDto;
 import com.masteryhub.todoapp.dto.RequestTodoDto;
 import com.masteryhub.todoapp.dto.ResponseTodoDto;
 import com.masteryhub.todoapp.service.TodoService;
@@ -106,5 +107,13 @@ public class TodoController {
   public ResponseEntity<List<ResponseTodoDto>> restoreAllTodo(
       @RequestHeader("Authorization") String token) {
     return todoService.restoreAllTodo(token);
+  }
+
+  @PatchMapping("/set-due-date")
+  public ResponseEntity<ResponseTodoDto> setDueDate(
+      @RequestHeader("Authorization") String token,
+      @RequestParam("id") Long id,
+      @RequestBody DueDateDto dueDate) {
+    return todoService.setDueDate(token, id, dueDate);
   }
 }

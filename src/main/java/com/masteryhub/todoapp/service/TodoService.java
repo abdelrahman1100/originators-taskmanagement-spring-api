@@ -1,5 +1,6 @@
 package com.masteryhub.todoapp.service;
 
+import com.masteryhub.todoapp.dto.DueDateDto;
 import com.masteryhub.todoapp.dto.RequestTodoDto;
 import com.masteryhub.todoapp.dto.ResponseTodoDto;
 import com.masteryhub.todoapp.models.Status;
@@ -112,6 +113,7 @@ public class TodoService {
     todoRes.setTitle(requestTodoDto.getTitle());
     todoRes.setDescription(requestTodoDto.getDescription());
     todoRes.setStatus(requestTodoDto.getStatus());
+    todoRes.setDueDate(requestTodoDto.getDueDate());
     todoRepository.save(todoRes);
     return new ResponseEntity<>(ResponseTodoDto.from(todoRes), HttpStatus.OK);
   }
@@ -137,6 +139,7 @@ public class TodoService {
           todo.setTitle(todoDto.getTitle());
           todo.setDescription(todoDto.getDescription());
           todo.setStatus(todoDto.getStatus());
+          todo.setDueDate(todoDto.getDueDate());
         }
       }
     }
@@ -352,5 +355,23 @@ public class TodoService {
     userRepository.save(user.get());
     List<ResponseTodoDto> responseDtos = todos.stream().map(ResponseTodoDto::from).toList();
     return new ResponseEntity<>(responseDtos, HttpStatus.OK);
+  }
+
+  public ResponseEntity<ResponseTodoDto> setDueDate(String token, Long id, DueDateDto dueDate) {
+    token = token.substring(7);
+    String username = jwtGenerator.getUsernameFromJWT(token);
+    Optional<UserEntity> user = userRepository.findByUsername(username);
+    List<String> todosids = user.get().getTodosIds();
+    TodoEntity todoRes =
+        todoRepository.findByCustomId(id).stream()
+            .filter(todo -> todosids.contains(todo.getId()))
+            .findFirst()
+            .orElse(null);
+    if (todoRes == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    todoRes.setDueDate(dueDate.getDueDate());
+    todoRepository.save(todoRes);
+    return new ResponseEntity<>(ResponseTodoDto.from(todoRes), HttpStatus.OK);
   }
 }
