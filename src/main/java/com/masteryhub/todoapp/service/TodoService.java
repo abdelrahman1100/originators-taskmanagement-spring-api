@@ -4,16 +4,14 @@ import com.masteryhub.todoapp.dto.DueDateDto;
 import com.masteryhub.todoapp.dto.RequestTodoDto;
 import com.masteryhub.todoapp.dto.ResponseTodoDto;
 import com.masteryhub.todoapp.models.Status;
+import com.masteryhub.todoapp.models.Tags;
 import com.masteryhub.todoapp.models.TodoEntity;
 import com.masteryhub.todoapp.models.UserEntity;
 import com.masteryhub.todoapp.repository.TodoRepository;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtGenerator;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,6 +112,7 @@ public class TodoService {
     todoRes.setDescription(requestTodoDto.getDescription());
     todoRes.setStatus(requestTodoDto.getStatus());
     todoRes.setDueDate(requestTodoDto.getDueDate());
+    todoRes.setTags(requestTodoDto.getTags());
     todoRepository.save(todoRes);
     return new ResponseEntity<>(ResponseTodoDto.from(todoRes), HttpStatus.OK);
   }
@@ -140,6 +139,7 @@ public class TodoService {
           todo.setDescription(todoDto.getDescription());
           todo.setStatus(todoDto.getStatus());
           todo.setDueDate(todoDto.getDueDate());
+          todo.setTags(todoDto.getTags());
         }
       }
     }
@@ -371,6 +371,39 @@ public class TodoService {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
     todoRes.setDueDate(dueDate.getDueDate());
+    todoRepository.save(todoRes);
+    return new ResponseEntity<>(ResponseTodoDto.from(todoRes), HttpStatus.OK);
+  }
+
+  public ResponseEntity<ResponseTodoDto> setTags(String token, Long id, List<String> tags) {
+    token = token.substring(7);
+    String username = jwtGenerator.getUsernameFromJWT(token);
+    Optional<UserEntity> user = userRepository.findByUsername(username);
+    List<String> todosids = user.get().getTodosIds();
+    TodoEntity todoRes =
+        todoRepository.findByCustomId(id).stream()
+            .filter(todo -> todosids.contains(todo.getId()))
+            .findFirst()
+            .orElse(null);
+    if (todoRes == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    List<Tags> validTags =
+        tags.stream()
+            .map(
+                tag -> {
+                  try {
+                    return Tags.valueOf(tag);
+                  } catch (IllegalArgumentException e) {
+                    return null;
+                  }
+                })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    if (validTags.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+    }
+    todoRes.setTags(validTags);
     todoRepository.save(todoRes);
     return new ResponseEntity<>(ResponseTodoDto.from(todoRes), HttpStatus.OK);
   }
