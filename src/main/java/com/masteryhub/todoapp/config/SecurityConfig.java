@@ -1,8 +1,11 @@
 package com.masteryhub.todoapp.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.masteryhub.todoapp.handlers.CustomOAuth2SuccessHandler;
+import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtAuthEntryPoint;
 import com.masteryhub.todoapp.security.JwtAuthenticationFilter;
+import com.masteryhub.todoapp.security.JwtGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,14 +24,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-  private JwtAuthEntryPoint authEntryPoint;
-  private CustomOAuth2SuccessHandler successHandler;
+  private final JwtAuthEntryPoint authEntryPoint;
+  private final CustomOAuth2SuccessHandler successHandler;
 
   @Autowired
   public SecurityConfig(
       JwtAuthEntryPoint authEntryPoint, @Lazy CustomOAuth2SuccessHandler successHandler) {
     this.authEntryPoint = authEntryPoint;
-    this.successHandler = new CustomOAuth2SuccessHandler(successHandler);
+    this.successHandler = successHandler;
   }
 
   @Bean
@@ -51,6 +54,7 @@ public class SecurityConfig {
                     .authenticated())
         .oauth2Login(oauth2 -> oauth2.successHandler(successHandler).failureUrl("/login"))
         .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
     return http.build();
   }
 
@@ -71,7 +75,8 @@ public class SecurityConfig {
   }
 
   @Bean
-  public CustomOAuth2SuccessHandler customOAuth2SuccessHandler() {
-    return new CustomOAuth2SuccessHandler(this.successHandler);
+  public CustomOAuth2SuccessHandler customOAuth2SuccessHandler(
+      UserRepository userRepository, JwtGenerator jwtGenerator, ObjectMapper objectMapper) {
+    return new CustomOAuth2SuccessHandler(userRepository, jwtGenerator, objectMapper);
   }
 }
