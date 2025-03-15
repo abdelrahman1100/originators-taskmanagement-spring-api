@@ -21,7 +21,6 @@ public class JwtGenerator {
   }
 
   public String generateToken(UserDetailsImpl userDetails) {
-    System.out.println("SECRET_KEY: " + securityConstants.getSecretKey());
     String username = userDetails.getUsername();
     Integer versionToken = userDetails.get__v();
     Date currentDate = new Date();
