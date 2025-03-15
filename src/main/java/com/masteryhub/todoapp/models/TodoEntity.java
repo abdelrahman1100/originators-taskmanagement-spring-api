@@ -13,7 +13,7 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "todo")
+@Document(collection = "todos")
 @TypeAlias("Todo")
 @Setter
 @Getter
