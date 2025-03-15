@@ -24,10 +24,11 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
   private final ObjectMapper objectMapper;
 
   @Autowired
-  public CustomOAuth2SuccessHandler(CustomOAuth2SuccessHandler other) {
-    this.userRepository = other.userRepository;
-    this.jwtGenerator = other.jwtGenerator;
-    this.objectMapper = other.objectMapper;
+  public CustomOAuth2SuccessHandler(
+      UserRepository userRepository, JwtGenerator jwtGenerator, ObjectMapper objectMapper) {
+    this.userRepository = userRepository;
+    this.jwtGenerator = jwtGenerator;
+    this.objectMapper = objectMapper;
   }
 
   @Override
@@ -38,16 +39,18 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
     String name = oAuth2User.getAttribute("name");
     String email = oAuth2User.getAttribute("email");
-
     UserEntity user =
         userRepository
             .findByEmail(email)
             .orElseGet(
                 () -> {
+                  System.out.println("User not found, creating new user...");
                   UserEntity newUser = new UserEntity();
                   newUser.setUsername(name);
                   newUser.setEmail(email);
-                  return userRepository.save(newUser);
+                  UserEntity savedUser = userRepository.save(newUser);
+                  System.out.println(savedUser.getId());
+                  return savedUser;
                 });
 
     UserDetailsImpl userDetails = UserDetailsImpl.build(user);
