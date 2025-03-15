@@ -69,7 +69,7 @@ public class AuthenticationService {
     token = token.substring(7);
     Optional<UserEntity> user =
         userRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token));
-    user.get().set__v(user.get().get__v() + 1);
+    user.get().set__v((user.get().get__v() + 1) % 1024);
     userRepository.save(user.get());
     return new ResponseEntity<>("User logged out successfully!", HttpStatus.OK);
   }
