@@ -18,6 +18,8 @@ public class TodoEntity {
 
   @Id private String id;
 
+  private String userId;
+
   private Long customId;
 
   private String title;

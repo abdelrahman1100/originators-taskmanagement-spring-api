@@ -43,20 +43,28 @@ public class AuthenticationService {
     List<String> errors =
         result.getFieldErrors().stream().map(error -> error.getDefaultMessage()).toList();
     if (!errors.isEmpty()) {
-      return ResponseEntity.badRequest().body(String.join("\n", errors));
+      MessageDto message = new MessageDto();
+      message.setMessage(String.join("\n", errors));
+      return new ResponseEntity<>(message, HttpStatus.CONFLICT);
     }
     if (userRepository.existsByUsername(registerDto.getUsername())) {
-      return new ResponseEntity<>("Username is already taken!", HttpStatus.CONFLICT);
+      MessageDto message = new MessageDto();
+      message.setMessage("Username is already taken!");
+      return new ResponseEntity<>(message, HttpStatus.CONFLICT);
     }
     if (userRepository.existsByEmail(registerDto.getEmail())) {
-      return new ResponseEntity<>("Email is already taken!", HttpStatus.CONFLICT);
+      MessageDto message = new MessageDto();
+      message.setMessage("Email is already taken!");
+      return new ResponseEntity<>(message, HttpStatus.CONFLICT);
     }
     UserEntity user = new UserEntity();
     user.setUsername(registerDto.getUsername());
     user.setEmail(registerDto.getEmail());
     user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
     userRepository.save(user);
-    return new ResponseEntity<>("User registered successfully!", HttpStatus.OK);
+    MessageDto message = new MessageDto();
+    message.setMessage("User Registered Successfully!");
+    return new ResponseEntity<>(message, HttpStatus.OK);
   }
 
   public ResponseEntity<AuthenticationResponseDto> authenticateUser(LoginDto loginDto) {
@@ -69,10 +77,11 @@ public class AuthenticationService {
     return new ResponseEntity<>(new AuthenticationResponseDto(token), HttpStatus.OK);
   }
 
-  public ResponseEntity<MessageDto> logout(String token) {
-    token = token.substring(7);
-    Optional<UserEntity> user =
-        userRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token));
+  public ResponseEntity<MessageDto> logout() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
     user.get().setTokenVersion((user.get().getTokenVersion() + 1) % 1024);
     userRepository.save(user.get());
     MessageDto message = new MessageDto();

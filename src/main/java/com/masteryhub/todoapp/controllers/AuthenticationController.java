@@ -34,8 +34,8 @@ public class AuthenticationController {
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<MessageDto> logout(@RequestHeader("Authorization") String token) {
-    return authenticationService.logout(token);
+  public ResponseEntity<MessageDto> logout() {
+    return authenticationService.logout();
   }
 
   @GetMapping("/google")

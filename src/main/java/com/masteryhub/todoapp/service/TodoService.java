@@ -3,10 +3,12 @@ package com.masteryhub.todoapp.service;
 import com.masteryhub.todoapp.dto.MessageDto;
 import com.masteryhub.todoapp.dto.RequestTodoDto;
 import com.masteryhub.todoapp.dto.ResponseTodoDto;
+import com.masteryhub.todoapp.models.Status;
 import com.masteryhub.todoapp.models.TodoEntity;
 import com.masteryhub.todoapp.models.UserEntity;
 import com.masteryhub.todoapp.repository.TodoRepository;
 import com.masteryhub.todoapp.repository.UserRepository;
+import com.masteryhub.todoapp.security.UserDetailsImpl;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -35,11 +37,13 @@ public class TodoService {
 
   public ResponseEntity<ResponseTodoDto> createTodo(RequestTodoDto requestTodoDto) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
     TodoEntity todo = new TodoEntity(requestTodoDto);
     long customId = user.get().getTodosIds().size() + 1;
     todo.setCustomId(customId);
+    todo.setUserId(user.get().getId());
     todoRepository.save(todo);
     user.get().addTodoId(todo.getId());
     userRepository.save(user.get());
@@ -48,27 +52,23 @@ public class TodoService {
 
   public ResponseEntity<ResponseTodoDto> getTodo(Long id) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
-    List<TodoEntity> todos = todoRepository.findByCustomId(id);
-    if (todos.isEmpty()) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
+    Optional<TodoEntity> todoOptional =
+        todoRepository.findByUserIdAndCustomIdAndDeletedAtIsNull(user.get().getId(), id);
+    if (todoOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-    ResponseTodoDto userTodos =
-        todos.stream()
-            .filter(
-                todo ->
-                    user.get().getTodosIds().contains(todo.getId()) && todo.getDeletedAt() == null)
-            .findFirst()
-            .map(ResponseTodoDto::from)
-            .orElse(null);
-    return new ResponseEntity<>(userTodos, HttpStatus.OK);
+
+    return ResponseEntity.ok(ResponseTodoDto.from(todoOptional.get()));
   }
 
   public ResponseEntity<List<ResponseTodoDto>> getTodos(int page, int size) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
     if (page > 0) page--;
     List<String> todoIds = user.get().getTodosIds();
     Pageable pageable = PageRequest.of(page, size);
@@ -80,34 +80,53 @@ public class TodoService {
   public ResponseEntity<List<ResponseTodoDto>> filterTodos(
       RequestTodoDto requestTodoDto, int page, int size) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
-    List<String> todosids = user.get().getTodosIds();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    UserEntity user = userOptional.get();
     if (page > 0) page--;
     Pageable pageable = PageRequest.of(page, size);
-    Page<TodoEntity> todoPage =
-        todoRepository.findByTitleContainingIgnoreCaseAndStatusAndTagsInAndDeletedAtIsNull(
-            todosids,
-            requestTodoDto.getTitle(),
-            requestTodoDto.getStatus(),
-            requestTodoDto.getTags(),
-            pageable);
+    String title = (requestTodoDto.getTitle() != null) ? requestTodoDto.getTitle() : "";
+    Status status = (requestTodoDto.getStatus() != null) ? requestTodoDto.getStatus() : null;
+    List<String> tags =
+        (requestTodoDto.getTags() != null) ? requestTodoDto.getTags() : Collections.emptyList();
+    Page<TodoEntity> todoPage;
+    if (status == null && tags.isEmpty()) {
+      todoPage =
+          todoRepository.findByUserIdAndTitleContainingIgnoreCaseAndDeletedAtIsNull(
+              user.getId(), title, pageable);
+    } else if (status == null) {
+      todoPage =
+          todoRepository.findByUserIdAndTitleContainingIgnoreCaseAndTagsInAndDeletedAtIsNull(
+              user.getId(), title, tags, pageable);
+    } else if (tags.isEmpty()) {
+      todoPage =
+          todoRepository.findByUserIdAndTitleContainingIgnoreCaseAndStatusAndDeletedAtIsNull(
+              user.getId(), title, status, pageable);
+    } else {
+      todoPage =
+          todoRepository
+              .findByUserIdAndTitleContainingIgnoreCaseAndStatusAndTagsInAndDeletedAtIsNull(
+                  user.getId(), title, status, tags, pageable);
+    }
     return ResponseEntity.ok(todoPage.map(ResponseTodoDto::from).getContent());
   }
 
   public ResponseEntity<ResponseTodoDto> editTodo(RequestTodoDto requestTodoDto, Long id) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
-    List<String> todosids = user.get().getTodosIds();
-    TodoEntity todoRes =
-        todoRepository.findByCustomId(id).stream()
-            .filter(todo -> todosids.contains(todo.getId().toString()))
-            .findFirst()
-            .orElse(null);
-    if (todoRes == null) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
+    Optional<TodoEntity> todoOptional =
+        todoRepository.findByUserIdAndCustomId(user.get().getId(), id);
+    System.out.println(user.get().getEmail());
+    if (todoOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+    TodoEntity todoRes = todoOptional.get();
     todoRes.setTitle(requestTodoDto.getTitle());
     todoRes.setDescription(requestTodoDto.getDescription());
     todoRes.setStatus(requestTodoDto.getStatus());
@@ -119,26 +138,31 @@ public class TodoService {
 
   public ResponseEntity<List<ResponseTodoDto>> editManyTodos(List<RequestTodoDto> todoDtoList) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
-    List<String> todosids = user.get().getTodosIds();
+    if (!(authentication.getPrincipal() instanceof UserDetailsImpl userDetails)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    UserEntity user = userOptional.get();
     List<Long> requestedTodoIds = todoDtoList.stream().map(RequestTodoDto::getId).toList();
     List<TodoEntity> todos =
-        todoRepository.findAllByCustomIdIn(requestedTodoIds).stream()
-            .filter(todo -> todosids.contains(todo.getId().toString()))
-            .toList();
+        todoRepository.findByUserIdAndCustomIdIn(user.getId(), requestedTodoIds);
     if (todos.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-    for (RequestTodoDto todoDto : todoDtoList) {
-      for (TodoEntity todo : todos) {
-        if (todo.getCustomId().equals(todoDto.getId())) {
-          todo.setTitle(todoDto.getTitle());
-          todo.setDescription(todoDto.getDescription());
-          todo.setStatus(todoDto.getStatus());
-          todo.setDueDate(todoDto.getDueDate());
-          todo.setTags(todoDto.getTags());
-        }
+    Map<Long, RequestTodoDto> updateMap =
+        todoDtoList.stream().collect(Collectors.toMap(RequestTodoDto::getId, todo -> todo));
+    for (TodoEntity todo : todos) {
+      RequestTodoDto updateData = updateMap.get(todo.getCustomId());
+      if (updateData != null) {
+        todo.setTitle(updateData.getTitle());
+        todo.setDescription(updateData.getDescription());
+        todo.setStatus(updateData.getStatus());
+        todo.setDueDate(updateData.getDueDate());
+        todo.setTags(updateData.getTags());
       }
     }
     todoRepository.saveAll(todos);
@@ -148,8 +172,9 @@ public class TodoService {
 
   public ResponseEntity<String> hardDeleteTodo(Long id) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
     List<String> todosids = user.get().getTodosIds();
     TodoEntity todoRes =
         todoRepository.findByCustomId(id).stream()
@@ -177,8 +202,9 @@ public class TodoService {
       return new ResponseEntity<>("No ids provided", HttpStatus.BAD_REQUEST);
     }
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
     List<Long> idList =
         Arrays.stream(ids.split(","))
             .map(String::trim)
@@ -209,8 +235,9 @@ public class TodoService {
 
   public ResponseEntity<String> hardDeleteAllTodos() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
     List<String> todosids = user.get().getTodosIds();
     List<TodoEntity> todoRes = todoRepository.findAllById(todosids);
     if (todoRes.isEmpty()) {
@@ -233,50 +260,55 @@ public class TodoService {
 
   public ResponseEntity<MessageDto> softDeleteTodo(Long id) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
-    List<String> todosids = user.get().getTodosIds();
-    TodoEntity todoRes =
-        todoRepository.findByCustomId(id).stream()
-            .filter(todo -> todosids.contains(todo.getId()))
-            .findFirst()
-            .orElse(null);
-    if (todoRes == null) {
+    if (!(authentication.getPrincipal() instanceof UserDetailsImpl userDetails)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+    UserEntity user = userOptional.get();
+    Optional<TodoEntity> todoOptional =
+        todoRepository.findByUserIdAndCustomIdAndDeletedAtIsNull(user.getId(), id);
+    if (todoOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    TodoEntity todoRes = todoOptional.get();
     todoRes.setDeletedAt(Instant.now());
     todoRepository.save(todoRes);
-    MessageDto message = new MessageDto();
-    message.setMessage("Todo Deleted Successfully");
-    return new ResponseEntity<>(message, HttpStatus.OK);
+    MessageDto message = new MessageDto("Todo Deleted Successfully");
+    return ResponseEntity.ok(message);
   }
 
   public ResponseEntity<MessageDto> softDeleteManyTodo(List<RequestTodoDto> todoDtoList) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
-    List<Long> idList = todoDtoList.stream().map(RequestTodoDto::getId).toList();
-    List<String> todosids = user.get().getTodosIds();
-    List<TodoEntity> todoRes =
-        todoRepository.findAllByCustomIdIn(idList).stream()
-            .filter(todo -> todosids.contains(todo.getId()))
-            .toList();
-    if (todoRes.isEmpty()) {
+    if (!(authentication.getPrincipal() instanceof UserDetailsImpl userDetails)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-    for (TodoEntity todo : todoRes) {
-      todo.setDeletedAt(Instant.now());
+    UserEntity user = userOptional.get();
+    List<Long> idList = todoDtoList.stream().map(RequestTodoDto::getId).toList();
+    List<TodoEntity> todos =
+        todoRepository.findByUserIdAndCustomIdInAndDeletedAtIsNull(user.getId(), idList);
+    if (todos.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-    todoRepository.saveAll(todoRes);
-    MessageDto message = new MessageDto();
-    message.setMessage("Todos Deleted Successfully");
-    return new ResponseEntity<>(message, HttpStatus.OK);
+    todos.forEach(todo -> todo.setDeletedAt(Instant.now()));
+    todoRepository.saveAll(todos);
+    MessageDto message = new MessageDto("Todos Deleted Successfully");
+    return ResponseEntity.ok(message);
   }
 
   public ResponseEntity<MessageDto> softDeleteAllTodo() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
     List<String> todosids = user.get().getTodosIds();
     List<TodoEntity> todoRes = todoRepository.findAllById(todosids);
     if (todoRes.isEmpty()) {
@@ -293,55 +325,55 @@ public class TodoService {
 
   public ResponseEntity<MessageDto> restoreTodo(Long id) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
-    List<TodoEntity> todos = todoRepository.findByCustomId(id);
-    if (todos.isEmpty()) {
+    if (!(authentication.getPrincipal() instanceof UserDetailsImpl userDetails)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-    TodoEntity userTodo =
-        todos.stream()
-            .filter(
-                todo ->
-                    user.get().getTodosIds().contains(todo.getId()) && todo.getDeletedAt() != null)
-            .findFirst()
-            .orElse(null);
-    if (userTodo == null) {
+    UserEntity user = userOptional.get();
+    Optional<TodoEntity> todoOptional =
+        todoRepository.findByUserIdAndCustomIdAndDeletedAtIsNotNull(user.getId(), id);
+
+    if (todoOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-    userTodo.setDeletedAt(null);
-    todoRepository.save(userTodo);
-    MessageDto message = new MessageDto();
-    message.setMessage("Todo Restored Successfully");
-    return new ResponseEntity<>(message, HttpStatus.OK);
+    TodoEntity todo = todoOptional.get();
+    todo.setDeletedAt(null);
+    todoRepository.save(todo);
+    MessageDto message = new MessageDto("Todo Restored Successfully");
+    return ResponseEntity.ok(message);
   }
 
   public ResponseEntity<MessageDto> restoreManyTodo(List<RequestTodoDto> todoDtoList) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
+    if (!(authentication.getPrincipal() instanceof UserDetailsImpl userDetails)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    UserEntity user = userOptional.get();
     List<Long> idList = todoDtoList.stream().map(RequestTodoDto::getId).toList();
-    List<String> todosids = user.get().getTodosIds();
     List<TodoEntity> todos =
-        todoRepository.findAllByCustomIdIn(idList).stream()
-            .filter(todo -> todosids.contains(todo.getId()))
-            .toList();
+        todoRepository.findByUserIdAndCustomIdInAndDeletedAtIsNotNull(user.getId(), idList);
     if (todos.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-    for (TodoEntity todo : todos) {
-      todo.setDeletedAt(null);
-    }
+    todos.forEach(todo -> todo.setDeletedAt(null));
     todoRepository.saveAll(todos);
-    MessageDto message = new MessageDto();
-    message.setMessage("Todos Restored Successfully");
-    return new ResponseEntity<>(message, HttpStatus.OK);
+    return ResponseEntity.ok(new MessageDto("Todos Restored Successfully"));
   }
 
   public ResponseEntity<MessageDto> restoreAllTodo() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
-    Optional<UserEntity> user = userRepository.findByUsername(username);
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
     List<String> todosids = user.get().getTodosIds();
     List<TodoEntity> todos = todoRepository.findAllById(todosids);
     for (TodoEntity todo : todos) {
