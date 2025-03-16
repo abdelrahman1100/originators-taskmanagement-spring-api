@@ -11,7 +11,6 @@ import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.UserDetailsImpl;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -168,94 +167,6 @@ public class TodoService {
     todoRepository.saveAll(todos);
     List<ResponseTodoDto> responseDtos = todos.stream().map(ResponseTodoDto::from).toList();
     return ResponseEntity.ok(responseDtos);
-  }
-
-  public ResponseEntity<String> hardDeleteTodo(Long id) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    String email = userDetails.getEmail();
-    Optional<UserEntity> user = userRepository.findByEmail(email);
-    List<String> todosids = user.get().getTodosIds();
-    TodoEntity todoRes =
-        todoRepository.findByCustomId(id).stream()
-            .findFirst()
-            .filter(todo -> todosids.contains(todo.getId()))
-            .orElse(null);
-    if (todoRes == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
-    user.get().removeTodoId(todoRes.getId());
-    userRepository.save(user.get());
-    todoRepository.delete(todoRes);
-    List<TodoEntity> remainingTodos =
-        todoRepository.findAll().stream()
-            .sorted(Comparator.comparing(TodoEntity::getCreatedAt))
-            .toList();
-    AtomicLong counter = new AtomicLong(1);
-    remainingTodos.forEach(todo -> todo.setCustomId(counter.getAndIncrement()));
-    todoRepository.saveAll(remainingTodos);
-    return new ResponseEntity<>("Todo deleted successfully", HttpStatus.OK);
-  }
-
-  public ResponseEntity<String> hardDeleteManyTodos(String ids) {
-    if (ids == null || ids.isEmpty()) {
-      return new ResponseEntity<>("No ids provided", HttpStatus.BAD_REQUEST);
-    }
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    String email = userDetails.getEmail();
-    Optional<UserEntity> user = userRepository.findByEmail(email);
-    List<Long> idList =
-        Arrays.stream(ids.split(","))
-            .map(String::trim)
-            .map(Long::parseLong)
-            .collect(Collectors.toList());
-    List<String> todosids = user.get().getTodosIds();
-    List<TodoEntity> todoRes =
-        todoRepository.findAllByCustomIdIn(idList).stream()
-            .filter(todo -> todosids.contains(todo.getId()))
-            .toList();
-    if (todoRes.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
-    for (TodoEntity todo : todoRes) {
-      user.get().removeTodoId(todo.getId());
-      todoRepository.delete(todo);
-    }
-    userRepository.save(user.get());
-    List<TodoEntity> remainingTodos =
-        todoRepository.findAll().stream()
-            .sorted(Comparator.comparing(TodoEntity::getCreatedAt))
-            .toList();
-    AtomicLong counter = new AtomicLong(1);
-    remainingTodos.forEach(todo -> todo.setCustomId(counter.getAndIncrement()));
-    todoRepository.saveAll(remainingTodos);
-    return new ResponseEntity<>("Todos deleted successfully", HttpStatus.OK);
-  }
-
-  public ResponseEntity<String> hardDeleteAllTodos() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    String email = userDetails.getEmail();
-    Optional<UserEntity> user = userRepository.findByEmail(email);
-    List<String> todosids = user.get().getTodosIds();
-    List<TodoEntity> todoRes = todoRepository.findAllById(todosids);
-    if (todoRes.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
-    for (TodoEntity todo : todoRes) {
-      todoRepository.delete(todo);
-    }
-    user.get().clearTodosIds();
-    userRepository.save(user.get());
-    List<TodoEntity> remainingTodos =
-        todoRepository.findAll().stream()
-            .sorted(Comparator.comparing(TodoEntity::getCreatedAt))
-            .toList();
-    AtomicLong counter = new AtomicLong(1);
-    remainingTodos.forEach(todo -> todo.setCustomId(counter.getAndIncrement()));
-    todoRepository.saveAll(remainingTodos);
-    return new ResponseEntity<>("All todos deleted successfully", HttpStatus.OK);
   }
 
   public ResponseEntity<MessageDto> softDeleteTodo(Long id) {

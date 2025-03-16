@@ -51,21 +51,6 @@ public class TodoController {
     return todoService.editManyTodos(requestTodoDtoList);
   }
 
-  @DeleteMapping("/hard-delete-todo")
-  public ResponseEntity<String> hardDeleteTodo(@RequestParam("id") Long id) {
-    return todoService.hardDeleteTodo(id);
-  }
-
-  @DeleteMapping("/hard-delete-many-todos")
-  public ResponseEntity<String> hardDeleteManyTodos(@RequestParam("ids") String ids) {
-    return todoService.hardDeleteManyTodos(ids);
-  }
-
-  @DeleteMapping("/hard-delete-all-todos")
-  public ResponseEntity<String> hardDeleteAllTodos() {
-    return todoService.hardDeleteAllTodos();
-  }
-
   @DeleteMapping("/soft-delete-todo")
   public ResponseEntity<MessageDto> softDeleteTodo(@RequestParam("id") Long id) {
     return todoService.softDeleteTodo(id);
