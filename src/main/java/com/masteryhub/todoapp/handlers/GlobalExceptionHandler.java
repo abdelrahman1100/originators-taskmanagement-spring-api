@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<Map<String, String>> handleIllegalArgumentException(
       IllegalArgumentException ex) {
-    return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid request or argument");
   }
 
   @ExceptionHandler(NumberFormatException.class)
@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
     }
 
     response.put("error", "Invalid request format");
-    response.put("message", ex.getMessage());
+    response.put("message", "Request body is not in the expected format");
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 

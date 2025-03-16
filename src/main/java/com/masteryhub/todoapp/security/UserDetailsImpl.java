@@ -40,7 +40,7 @@ public class UserDetailsImpl implements UserDetails {
         user.getEmail(),
         user.getPassword(),
         Collections.emptyList(),
-        user.get__v());
+        user.getTokenVersion());
   }
 
   @Override

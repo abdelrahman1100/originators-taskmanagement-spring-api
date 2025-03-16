@@ -6,15 +6,11 @@ import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "todos")
-@TypeAlias("Todo")
 @Setter
 @Getter
 @NoArgsConstructor
@@ -31,15 +27,7 @@ public class TodoEntity {
   private Status status;
 
   @Field("tags")
-  private List<Tags> tags;
-
-  public TodoEntity(RequestTodoDto requestTodoDto) {
-    this.title = requestTodoDto.getTitle();
-    this.description = requestTodoDto.getDescription();
-    this.status = requestTodoDto.getStatus();
-    this.dueDate = requestTodoDto.getDueDate();
-    this.tags = requestTodoDto.getTags();
-  }
+  private List<String> tags;
 
   @CreatedDate
   @Field("created_at")
@@ -54,4 +42,14 @@ public class TodoEntity {
 
   @Field("due_date")
   private Instant dueDate;
+
+  @Version private Long __v;
+
+  public TodoEntity(RequestTodoDto requestTodoDto) {
+    this.title = requestTodoDto.getTitle();
+    this.description = requestTodoDto.getDescription();
+    this.status = requestTodoDto.getStatus();
+    this.dueDate = requestTodoDto.getDueDate();
+    this.tags = requestTodoDto.getTags();
+  }
 }

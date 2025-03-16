@@ -16,8 +16,11 @@ public interface TodoRepository extends MongoRepository<TodoEntity, String> {
 
   Page<TodoEntity> findByIdInAndStatus(List<String> ids, Status status, Pageable pageable);
 
-  Page<TodoEntity> findAllByIdInAndDeletedAtIsNull(List<String> todoIds, Pageable pageable);
+  Page<TodoEntity> findAllByIdInAndDeletedAtIsNull(List<String> ids, Pageable pageable);
 
   Page<TodoEntity> findByIdInAndStatusAndDeletedAtIsNull(
       List<String> ids, Status status, Pageable pageable);
+
+  Page<TodoEntity> findByTitleContainingIgnoreCaseAndStatusAndTagsInAndDeletedAtIsNull(
+      List<String> ids, String title, Status status, List<String> tags, Pageable pageable);
 }
