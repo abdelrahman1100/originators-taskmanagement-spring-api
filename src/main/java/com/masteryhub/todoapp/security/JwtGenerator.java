@@ -21,7 +21,6 @@ public class JwtGenerator {
   }
 
   public String generateToken(UserDetailsImpl userDetails) {
-    String username = userDetails.getUsername();
     String email = userDetails.getEmail();
     Integer versionToken = userDetails.get__v();
     Date currentDate = new Date();
