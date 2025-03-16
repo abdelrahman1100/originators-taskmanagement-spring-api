@@ -24,6 +24,8 @@ public class UserEntity {
 
   private List<String> todos = new ArrayList<>();
 
+  private List<String> friends = new ArrayList<>();
+
   private Integer tokenVersion = 0;
 
   @Version private Long __v;
@@ -46,5 +48,13 @@ public class UserEntity {
 
   public void clearTodosIds() {
     this.todos.clear();
+  }
+
+  public void addFriend(String username) {
+    this.friends.add(username);
+  }
+
+  public void removeFriend(String username) {
+    this.friends.remove(username);
   }
 }
