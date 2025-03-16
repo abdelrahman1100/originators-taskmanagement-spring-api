@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 @Getter
 @AllArgsConstructor
-public class AuthenticationResponseDto {
-  private String verificationToken;
+public class ResponseFriendsDto {
+  private String username;
 }

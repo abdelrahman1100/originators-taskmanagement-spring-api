@@ -21,13 +21,13 @@ public class JwtGenerator {
   }
 
   public String generateToken(UserDetailsImpl userDetails) {
-    String username = userDetails.getUsername();
+    String email = userDetails.getEmail();
     Integer versionToken = userDetails.get__v();
     Date currentDate = new Date();
     Date expireDate = new Date(currentDate.getTime() + securityConstants.getJwtExpiration());
 
     return Jwts.builder()
-        .setSubject(username)
+        .setSubject(email)
         .claim("versionToken", versionToken)
         .setIssuedAt(currentDate)
         .setExpiration(expireDate)

@@ -6,11 +6,10 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "users")
-@TypeAlias("User")
 @Setter
 @Getter
 public class UserEntity {
@@ -23,27 +22,39 @@ public class UserEntity {
 
   private String password;
 
-  private List<String> todosIds = new ArrayList<>();
+  private List<String> todos = new ArrayList<>();
 
-  private Integer __v = 0;
+  private List<String> friends = new ArrayList<>();
+
+  private Integer tokenVersion = 0;
+
+  @Version private Long __v;
 
   public List<String> getTodosIds() {
-    return Collections.unmodifiableList(todosIds);
+    return Collections.unmodifiableList(todos);
   }
 
   public void setTodosIds(List<String> newTodosIds) {
-    this.todosIds = new ArrayList<>(newTodosIds);
+    this.todos = new ArrayList<>(newTodosIds);
   }
 
   public void addTodoId(String todoId) {
-    this.todosIds.add(todoId);
+    this.todos.add(todoId);
   }
 
   public void removeTodoId(String todoId) {
-    this.todosIds.remove(todoId);
+    this.todos.remove(todoId);
   }
 
   public void clearTodosIds() {
-    this.todosIds.clear();
+    this.todos.clear();
+  }
+
+  public void addFriend(String username) {
+    this.friends.add(username);
+  }
+
+  public void removeFriend(String username) {
+    this.friends.remove(username);
   }
 }

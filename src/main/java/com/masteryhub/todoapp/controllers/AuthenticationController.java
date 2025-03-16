@@ -2,6 +2,7 @@ package com.masteryhub.todoapp.controllers;
 
 import com.masteryhub.todoapp.dto.AuthenticationResponseDto;
 import com.masteryhub.todoapp.dto.LoginDto;
+import com.masteryhub.todoapp.dto.MessageDto;
 import com.masteryhub.todoapp.dto.RegisterDto;
 import com.masteryhub.todoapp.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,14 +28,14 @@ public class AuthenticationController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<String> register(
+  public ResponseEntity<MessageDto> register(
       @Valid @RequestBody RegisterDto registerDto, BindingResult result) {
     return authenticationService.registerUser(registerDto, result);
   }
 
   @PostMapping("/logout")
-  public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
-    return authenticationService.logout(token);
+  public ResponseEntity<MessageDto> logout() {
+    return authenticationService.logout();
   }
 
   @GetMapping("/google")

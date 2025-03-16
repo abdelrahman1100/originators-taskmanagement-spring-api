@@ -1,7 +1,6 @@
 package com.masteryhub.todoapp.dto;
 
 import com.masteryhub.todoapp.models.Status;
-import com.masteryhub.todoapp.models.Tags;
 import com.masteryhub.todoapp.models.TodoEntity;
 import java.time.Instant;
 import java.util.List;
@@ -28,7 +27,7 @@ public class ResponseTodoDto {
 
   private Instant dueDate;
 
-  private List<Tags> tags;
+  private List<String> tags;
 
   public static ResponseTodoDto from(TodoEntity todo) {
     return new ResponseTodoDto(

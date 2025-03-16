@@ -1,7 +1,6 @@
 package com.masteryhub.todoapp.dto;
 
 import com.masteryhub.todoapp.models.Status;
-import com.masteryhub.todoapp.models.Tags;
 import java.time.Instant;
 import java.util.List;
 import lombok.Getter;
@@ -11,7 +10,7 @@ import lombok.Setter;
 @Getter
 public class RequestTodoDto {
 
-  private Long customId;
+  private Long id;
 
   private String title;
 
@@ -21,5 +20,5 @@ public class RequestTodoDto {
 
   private Instant dueDate;
 
-  private List<Tags> tags;
+  private List<String> tags;
 }

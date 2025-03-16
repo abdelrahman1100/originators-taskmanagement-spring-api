@@ -11,7 +11,6 @@ import lombok.Setter;
 public class RegisterDto {
 
   @NotBlank(message = "Username cannot be blank")
-  @Size(min = 4, message = "Username must be at least 4 characters")
   private String username;
 
   @NotBlank(message = "Password cannot be blank")
@@ -21,4 +20,8 @@ public class RegisterDto {
       message =
           "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
   private String password;
+
+  @NotBlank(message = "Email cannot be blank")
+  @Pattern(regexp = "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$", message = "Invalid email format")
+  private String email;
 }

@@ -2,6 +2,7 @@ package com.masteryhub.todoapp.service;
 
 import com.masteryhub.todoapp.dto.AuthenticationResponseDto;
 import com.masteryhub.todoapp.dto.LoginDto;
+import com.masteryhub.todoapp.dto.MessageDto;
 import com.masteryhub.todoapp.dto.RegisterDto;
 import com.masteryhub.todoapp.models.UserEntity;
 import com.masteryhub.todoapp.repository.UserRepository;
@@ -38,39 +39,53 @@ public class AuthenticationService {
     this.authenticationManager = authenticationManager;
   }
 
-  public ResponseEntity<String> registerUser(RegisterDto registerDto, BindingResult result) {
+  public ResponseEntity<MessageDto> registerUser(RegisterDto registerDto, BindingResult result) {
     List<String> errors =
         result.getFieldErrors().stream().map(error -> error.getDefaultMessage()).toList();
     if (!errors.isEmpty()) {
-      return ResponseEntity.badRequest().body(String.join("\n", errors));
+      MessageDto message = new MessageDto();
+      message.setMessage(String.join("\n", errors));
+      return new ResponseEntity<>(message, HttpStatus.CONFLICT);
     }
     if (userRepository.existsByUsername(registerDto.getUsername())) {
-      return new ResponseEntity<>("Username is already taken!", HttpStatus.CONFLICT);
+      MessageDto message = new MessageDto();
+      message.setMessage("Username is already taken!");
+      return new ResponseEntity<>(message, HttpStatus.CONFLICT);
+    }
+    if (userRepository.existsByEmail(registerDto.getEmail())) {
+      MessageDto message = new MessageDto();
+      message.setMessage("Email is already taken!");
+      return new ResponseEntity<>(message, HttpStatus.CONFLICT);
     }
     UserEntity user = new UserEntity();
     user.setUsername(registerDto.getUsername());
+    user.setEmail(registerDto.getEmail());
     user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
     userRepository.save(user);
-    return new ResponseEntity<>("User registered successfully!", HttpStatus.OK);
+    MessageDto message = new MessageDto();
+    message.setMessage("User Registered Successfully!");
+    return new ResponseEntity<>(message, HttpStatus.OK);
   }
 
   public ResponseEntity<AuthenticationResponseDto> authenticateUser(LoginDto loginDto) {
     Authentication authentication =
         authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                loginDto.getUsername(), loginDto.getPassword()));
+            new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
     SecurityContextHolder.getContext().setAuthentication(authentication);
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     String token = jwtGenerator.generateToken(userDetails);
     return new ResponseEntity<>(new AuthenticationResponseDto(token), HttpStatus.OK);
   }
 
-  public ResponseEntity<String> logout(String token) {
-    token = token.substring(7);
-    Optional<UserEntity> user =
-        userRepository.findByUsername(jwtGenerator.getUsernameFromJWT(token));
-    user.get().set__v((user.get().get__v() + 1) % 1024);
+  public ResponseEntity<MessageDto> logout() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
+    user.get().setTokenVersion((user.get().getTokenVersion() + 1) % 1024);
     userRepository.save(user.get());
-    return new ResponseEntity<>("User logged out successfully!", HttpStatus.OK);
+    MessageDto message = new MessageDto();
+    message.setMessage("User Logged Out Successfully!");
+    return new ResponseEntity<>(message, HttpStatus.OK);
   }
 }
