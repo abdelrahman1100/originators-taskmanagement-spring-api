@@ -1,349 +1,299 @@
 package com.masteryhub.todoapp.service;
 
-import com.masteryhub.todoapp.dto.TodoDto;
+import com.masteryhub.todoapp.dto.MessageDto;
+import com.masteryhub.todoapp.dto.RequestTodoDto;
+import com.masteryhub.todoapp.dto.ResponseTodoDto;
 import com.masteryhub.todoapp.models.Status;
 import com.masteryhub.todoapp.models.TodoEntity;
 import com.masteryhub.todoapp.models.UserEntity;
+import com.masteryhub.todoapp.repository.TodoRepository;
 import com.masteryhub.todoapp.repository.UserRepository;
-import com.masteryhub.todoapp.security.JwtGenerator;
+import com.masteryhub.todoapp.security.UserDetailsImpl;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class TodoService {
 
-    private final JwtGenerator jwtGenerator;
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
+  private final TodoRepository todoRepository;
 
-    @Autowired
-    public TodoService(JwtGenerator jwtGenerator, UserRepository userRepository) {
-        this.jwtGenerator = jwtGenerator;
-        this.userRepository = userRepository;
+  @Autowired
+  public TodoService(UserRepository userRepository, TodoRepository todoRepository) {
+    this.userRepository = userRepository;
+    this.todoRepository = todoRepository;
+  }
+
+  public ResponseEntity<ResponseTodoDto> createTodo(RequestTodoDto requestTodoDto) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
+    TodoEntity todo = new TodoEntity(requestTodoDto);
+    long customId = user.get().getTodosIds().size() + 1;
+    todo.setCustomId(customId);
+    todo.setUserId(user.get().getId());
+    todoRepository.save(todo);
+    user.get().addTodoId(todo.getId());
+    userRepository.save(user.get());
+    return new ResponseEntity<>(ResponseTodoDto.from(todo), HttpStatus.CREATED);
+  }
+
+  public ResponseEntity<ResponseTodoDto> getTodo(Long id) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
+    Optional<TodoEntity> todoOptional =
+        todoRepository.findByUserIdAndCustomIdAndDeletedAtIsNull(user.get().getId(), id);
+    if (todoOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    public ResponseEntity<?> getTodos(String token, int page, int size) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        if (todos == null || todos.isEmpty()) {
-            return new ResponseEntity<>(List.of(), HttpStatus.OK);
-        }
-        if (page > 0) page--;
-        int start = Math.min(page * size, todos.size());
-        int end = Math.min(start + size, todos.size());
-        List<TodoEntity> paginatedTodos = todos.subList(start, end);
-        List<TodoDto> todoDtosList = paginatedTodos.stream()
-                .filter(todo -> todo.getDeletedAt() == null)
-                .map(TodoDto::new)
-                .collect(Collectors.toList());
-        return new ResponseEntity<>(todoDtosList, HttpStatus.OK);
-    }
+    return ResponseEntity.ok(ResponseTodoDto.from(todoOptional.get()));
+  }
 
-    public ResponseEntity<?> createTodo(String token, TodoDto todoDto) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
-        TodoEntity todo = new TodoEntity();
-        todo.setTitle(todoDto.getTitle());
-        todo.setDescription(todoDto.getDescription());
-        todo.setStatus(todoDto.getStatus());
-        todo.setCreatedAt(Instant.now().toString());
-        todo.setUpdatedAt(Instant.now().toString());
-        if (user.get().getTodolist() == null) {
-            todo.setId(1L);
-        } else {
-            todo.setId(user.get().getTodolist().size() + 1L);
-        }
-        if (user.get().getTodolist() == null) {
-            user.get().setTodolist(List.of(todo));
-        } else {
-            user.get().getTodolist().add(todo);
-        }
-        userRepository.save(user.get());
-        return new ResponseEntity<>("Todo created successfully", HttpStatus.OK);
-    }
+  public ResponseEntity<List<ResponseTodoDto>> getTodos(int page, int size) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
+    if (page > 0) page--;
+    List<String> todoIds = user.get().getTodosIds();
+    Pageable pageable = PageRequest.of(page, size);
+    Page<TodoEntity> todoPage = todoRepository.findAllByIdInAndDeletedAtIsNull(todoIds, pageable);
+    Page<ResponseTodoDto> responsePage = todoPage.map(ResponseTodoDto::from);
+    return new ResponseEntity<>(responsePage.getContent(), HttpStatus.OK);
+  }
 
-    public ResponseEntity<?> editTodo(String token, TodoDto todoDto) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
-        System.out.println(username);
-        List<TodoEntity> todos = user.get().getTodolist();
-        for (TodoEntity todo : todos) {
-            if (todo.getId().equals(todoDto.getId())) {
-                todo.setTitle(todoDto.getTitle());
-                todo.setDescription(todoDto.getDescription());
-                todo.setStatus(todoDto.getStatus());
-                todo.setUpdatedAt(Instant.now().toString());
-                userRepository.save(user.get());
-                return new ResponseEntity<>("Todo updated successfully", HttpStatus.OK);
-            }
-        }
-        return ResponseEntity.badRequest().body("Todo not found");
+  public ResponseEntity<List<ResponseTodoDto>> filterTodos(
+      RequestTodoDto requestTodoDto, int page, int size) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-
-    public ResponseEntity<?> deleteTodo(String token, Long id) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        for (TodoEntity todo : todos) {
-            if (todo.getId().equals(id)) {
-                todos.remove(todo);
-                userRepository.save(user.get());
-                return new ResponseEntity<>("Todo deleted successfully", HttpStatus.OK);
-            }
-        }
-        return ResponseEntity.badRequest().body("Todo not found");
+    UserEntity user = userOptional.get();
+    if (page > 0) page--;
+    Pageable pageable = PageRequest.of(page, size);
+    String title = (requestTodoDto.getTitle() != null) ? requestTodoDto.getTitle() : "";
+    Status status = (requestTodoDto.getStatus() != null) ? requestTodoDto.getStatus() : null;
+    List<String> tags =
+        (requestTodoDto.getTags() != null) ? requestTodoDto.getTags() : Collections.emptyList();
+    Page<TodoEntity> todoPage;
+    if (status == null && tags.isEmpty()) {
+      todoPage =
+          todoRepository.findByUserIdAndTitleContainingIgnoreCaseAndDeletedAtIsNull(
+              user.getId(), title, pageable);
+    } else if (status == null) {
+      todoPage =
+          todoRepository.findByUserIdAndTitleContainingIgnoreCaseAndTagsInAndDeletedAtIsNull(
+              user.getId(), title, tags, pageable);
+    } else if (tags.isEmpty()) {
+      todoPage =
+          todoRepository.findByUserIdAndTitleContainingIgnoreCaseAndStatusAndDeletedAtIsNull(
+              user.getId(), title, status, pageable);
+    } else {
+      todoPage =
+          todoRepository
+              .findByUserIdAndTitleContainingIgnoreCaseAndStatusAndTagsInAndDeletedAtIsNull(
+                  user.getId(), title, status, tags, pageable);
     }
+    return ResponseEntity.ok(todoPage.map(ResponseTodoDto::from).getContent());
+  }
 
-    public ResponseEntity<?> getTodo(String token, Long id) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        for (TodoEntity todo : todos) {
-            if (todo.getId().equals(id)) {
-                if (todo.getDeletedAt() != null) {
-                    return new ResponseEntity<>("Todo not found", HttpStatus.BAD_REQUEST);
-                }
-                TodoDto todoDto = new TodoDto(todo);
-                return new ResponseEntity<>(todoDto, HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity<>("Todo not found", HttpStatus.BAD_REQUEST);
+  public ResponseEntity<ResponseTodoDto> editTodo(RequestTodoDto requestTodoDto, Long id) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
+    Optional<TodoEntity> todoOptional =
+        todoRepository.findByUserIdAndCustomId(user.get().getId(), id);
+    System.out.println(user.get().getEmail());
+    if (todoOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+    TodoEntity todoRes = todoOptional.get();
+    todoRes.setTitle(requestTodoDto.getTitle());
+    todoRes.setDescription(requestTodoDto.getDescription());
+    todoRes.setStatus(requestTodoDto.getStatus());
+    todoRes.setDueDate(requestTodoDto.getDueDate());
+    todoRes.setTags(requestTodoDto.getTags());
+    todoRepository.save(todoRes);
+    return new ResponseEntity<>(ResponseTodoDto.from(todoRes), HttpStatus.OK);
+  }
 
-    public ResponseEntity<?> deleteAllTodos(String token) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-        }
-        user.get().setTodolist(null);
-        userRepository.save(user.get());
-        return new ResponseEntity<>("All todos deleted successfully", HttpStatus.OK);
+  public ResponseEntity<List<ResponseTodoDto>> editManyTodos(List<RequestTodoDto> todoDtoList) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (!(authentication.getPrincipal() instanceof UserDetailsImpl userDetails)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
-
-    public ResponseEntity<?> getTodosByStatus(String token, String status, int page, int size) {
-        token = token.substring(7);
-        Status statusEnum;
-        try {
-            statusEnum = Status.valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("Invalid status", HttpStatus.BAD_REQUEST);
-        }
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        if (todos == null || todos.isEmpty()) {
-            return new ResponseEntity<>(List.of(), HttpStatus.OK);
-        }
-        if (page > 0) page--;
-        int start = Math.min(page * size, todos.size());
-        int end = Math.min(start + size, todos.size());
-        List<TodoEntity> paginatedTodos = todos.stream()
-                .filter(todo -> todo.getStatus().equals(statusEnum))
-                .filter(todo -> todo.getDeletedAt() == null)
-                .toList();
-        paginatedTodos = paginatedTodos.subList(start, Math.min(end, paginatedTodos.size()));
-        List<TodoDto> todoDtosList = paginatedTodos.stream()
-                .map(TodoDto::new)
-                .collect(Collectors.toList());
-        return new ResponseEntity<>(todoDtosList, HttpStatus.OK);
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-
-    public ResponseEntity<?> deleteManyTodos(String token, String ids) {
-        token = token.substring(7);
-        if (ids == null || ids.isEmpty()) {
-            return new ResponseEntity<>("No ids provided", HttpStatus.BAD_REQUEST);
-        }
-        List<Long> idList;
-        try {
-            idList = Arrays.stream(ids.split(","))
-                    .map(String::trim) // Remove spaces
-                    .map(Long::parseLong) // Convert to Long
-                    .collect(Collectors.toList());
-        } catch (NumberFormatException e) {
-            return new ResponseEntity<>("Invalid ID format. IDs must be numbers.", HttpStatus.BAD_REQUEST);
-        }
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        todos.removeIf(todo -> idList.contains(todo.getId()));
-        userRepository.save(user.get());
-        return new ResponseEntity<>("Todos deleted successfully", HttpStatus.OK);
+    UserEntity user = userOptional.get();
+    List<Long> requestedTodoIds = todoDtoList.stream().map(RequestTodoDto::getId).toList();
+    List<TodoEntity> todos =
+        todoRepository.findByUserIdAndCustomIdIn(user.getId(), requestedTodoIds);
+    if (todos.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-
-    public ResponseEntity<?> editManyTodos(String token, List<TodoDto> todoDtoList) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        for (TodoDto todoDto : todoDtoList) {
-            for (TodoEntity todo : todos) {
-                if (todo.getId().equals(todoDto.getId())) {
-                    todo.setTitle(todoDto.getTitle());
-                    todo.setDescription(todoDto.getDescription());
-                    todo.setStatus(todoDto.getStatus());
-                    todo.setUpdatedAt(Instant.now().toString());
-                }
-            }
-        }
-        userRepository.save(user.get());
-        return new ResponseEntity<>("Todos updated successfully", HttpStatus.OK);
+    Map<Long, RequestTodoDto> updateMap =
+        todoDtoList.stream().collect(Collectors.toMap(RequestTodoDto::getId, todo -> todo));
+    for (TodoEntity todo : todos) {
+      RequestTodoDto updateData = updateMap.get(todo.getCustomId());
+      if (updateData != null) {
+        todo.setTitle(updateData.getTitle());
+        todo.setDescription(updateData.getDescription());
+        todo.setStatus(updateData.getStatus());
+        todo.setDueDate(updateData.getDueDate());
+        todo.setTags(updateData.getTags());
+      }
     }
+    todoRepository.saveAll(todos);
+    List<ResponseTodoDto> responseDtos = todos.stream().map(ResponseTodoDto::from).toList();
+    return ResponseEntity.ok(responseDtos);
+  }
 
-    public ResponseEntity<?> softDeleteTodo(String token, Long id) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        for (TodoEntity todo : todos) {
-            if (todo.getId().equals(id)) {
-                todo.setDeletedAt(Instant.now().toString());
-                userRepository.save(user.get());
-                return new ResponseEntity<>("Todo soft deleted successfully", HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity<>("Todo not found", HttpStatus.BAD_REQUEST);
+  public ResponseEntity<MessageDto> softDeleteTodo(Long id) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (!(authentication.getPrincipal() instanceof UserDetailsImpl userDetails)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
-
-    public ResponseEntity<?> softDeleteAllTodo(String token) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        for (TodoEntity todo : todos) {
-            todo.setDeletedAt(Instant.now().toString());
-        }
-        userRepository.save(user.get());
-        return new ResponseEntity<>("All todos soft deleted successfully", HttpStatus.OK);
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-
-    public ResponseEntity<?> softDeleteManyTodo(String token, String ids) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-        }
-        List<Long> idList;
-        try {
-            idList = Arrays.stream(ids.split(","))
-                    .map(String::trim) // Remove spaces
-                    .map(Long::parseLong) // Convert to Long
-                    .collect(Collectors.toList());
-        } catch (NumberFormatException e) {
-            return new ResponseEntity<>("Invalid ID format. IDs must be numbers.", HttpStatus.BAD_REQUEST);
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        for (TodoEntity todo : todos) {
-            if (idList.contains(todo.getId())) {
-                todo.setDeletedAt(Instant.now().toString());
-            }
-        }
-        userRepository.save(user.get());
-        return new ResponseEntity<>("All todos soft deleted successfully", HttpStatus.OK);
+    UserEntity user = userOptional.get();
+    Optional<TodoEntity> todoOptional =
+        todoRepository.findByUserIdAndCustomIdAndDeletedAtIsNull(user.getId(), id);
+    if (todoOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+    TodoEntity todoRes = todoOptional.get();
+    todoRes.setDeletedAt(Instant.now());
+    todoRepository.save(todoRes);
+    MessageDto message = new MessageDto("Todo Deleted Successfully");
+    return ResponseEntity.ok(message);
+  }
 
-    public ResponseEntity<?> restoreTodo(String token, Long id) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        for (TodoEntity todo : todos) {
-            if (todo.getId().equals(id)) {
-                todo.setDeletedAt(null);
-                userRepository.save(user.get());
-                return new ResponseEntity<>("Todo restored successfully", HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity<>("Todo not found", HttpStatus.BAD_REQUEST);
+  public ResponseEntity<MessageDto> softDeleteManyTodo(List<RequestTodoDto> todoDtoList) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (!(authentication.getPrincipal() instanceof UserDetailsImpl userDetails)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
-
-    public ResponseEntity<?> restoreAllTodo(String token) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        for (TodoEntity todo : todos) {
-            todo.setDeletedAt(null);
-        }
-        userRepository.save(user.get());
-        return new ResponseEntity<>("All todos restored successfully", HttpStatus.OK);
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-
-    public ResponseEntity<?> restoreManyTodo(String token, String ids) {
-        token = token.substring(7);
-        String username = jwtGenerator.getUsernameFromJWT(token);
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-        }
-        List<Long> idList;
-        try {
-            idList = Arrays.stream(ids.split(","))
-                    .map(String::trim) // Remove spaces
-                    .map(Long::parseLong) // Convert to Long
-                    .collect(Collectors.toList());
-        } catch (NumberFormatException e) {
-            return new ResponseEntity<>("Invalid ID format. IDs must be numbers.", HttpStatus.BAD_REQUEST);
-        }
-        List<TodoEntity> todos = user.get().getTodolist();
-        for (TodoEntity todo : todos) {
-            if (idList.contains(todo.getId())) {
-                todo.setDeletedAt(null);
-            }
-        }
-        userRepository.save(user.get());
-        return new ResponseEntity<>("All todos restored successfully", HttpStatus.OK);
+    UserEntity user = userOptional.get();
+    List<Long> idList = todoDtoList.stream().map(RequestTodoDto::getId).toList();
+    List<TodoEntity> todos =
+        todoRepository.findByUserIdAndCustomIdInAndDeletedAtIsNull(user.getId(), idList);
+    if (todos.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+    todos.forEach(todo -> todo.setDeletedAt(Instant.now()));
+    todoRepository.saveAll(todos);
+    MessageDto message = new MessageDto("Todos Deleted Successfully");
+    return ResponseEntity.ok(message);
+  }
 
+  public ResponseEntity<MessageDto> softDeleteAllTodo() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
+    List<String> todosids = user.get().getTodosIds();
+    List<TodoEntity> todoRes = todoRepository.findAllById(todosids);
+    if (todoRes.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    for (TodoEntity todo : todoRes) {
+      todo.setDeletedAt(Instant.now());
+    }
+    todoRepository.saveAll(todoRes);
+    MessageDto message = new MessageDto();
+    message.setMessage("All Todos Deleted Successfully");
+    return new ResponseEntity<>(message, HttpStatus.OK);
+  }
+
+  public ResponseEntity<MessageDto> restoreTodo(Long id) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (!(authentication.getPrincipal() instanceof UserDetailsImpl userDetails)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    UserEntity user = userOptional.get();
+    Optional<TodoEntity> todoOptional =
+        todoRepository.findByUserIdAndCustomIdAndDeletedAtIsNotNull(user.getId(), id);
+
+    if (todoOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    TodoEntity todo = todoOptional.get();
+    todo.setDeletedAt(null);
+    todoRepository.save(todo);
+    MessageDto message = new MessageDto("Todo Restored Successfully");
+    return ResponseEntity.ok(message);
+  }
+
+  public ResponseEntity<MessageDto> restoreManyTodo(List<RequestTodoDto> todoDtoList) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (!(authentication.getPrincipal() instanceof UserDetailsImpl userDetails)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    String email = userDetails.getEmail();
+    Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+    if (userOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    UserEntity user = userOptional.get();
+    List<Long> idList = todoDtoList.stream().map(RequestTodoDto::getId).toList();
+    List<TodoEntity> todos =
+        todoRepository.findByUserIdAndCustomIdInAndDeletedAtIsNotNull(user.getId(), idList);
+    if (todos.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    todos.forEach(todo -> todo.setDeletedAt(null));
+    todoRepository.saveAll(todos);
+    return ResponseEntity.ok(new MessageDto("Todos Restored Successfully"));
+  }
+
+  public ResponseEntity<MessageDto> restoreAllTodo() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
+    List<String> todosids = user.get().getTodosIds();
+    List<TodoEntity> todos = todoRepository.findAllById(todosids);
+    for (TodoEntity todo : todos) {
+      todo.setDeletedAt(null);
+    }
+    todoRepository.saveAll(todos);
+    userRepository.save(user.get());
+    MessageDto message = new MessageDto();
+    message.setMessage("All Todos Restored Successfully");
+    return new ResponseEntity<>(message, HttpStatus.OK);
+  }
 }

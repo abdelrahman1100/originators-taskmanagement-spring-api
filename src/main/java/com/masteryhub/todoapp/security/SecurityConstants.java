@@ -1,8 +1,26 @@
 package com.masteryhub.todoapp.security;
 
-import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SecurityConstants {
-    public static final long JWT_EXPIRATION = 864000000;
-    public static final String SECRET_KEY = "5f1b41f01a99eef508a94bff09bedbe975e44abcf6f4cfbf73307b4ab5895328";
+
+  private final String secretKey;
+  private final long jwtExpiration;
+
+  public SecurityConstants(
+      @Value("${security.jwt.secret}") String secretKey,
+      @Value("${security.jwt.expiration}") long jwtExpiration) {
+    this.secretKey = secretKey;
+    this.jwtExpiration = jwtExpiration;
+  }
+
+  public String getSecretKey() {
+    return secretKey;
+  }
+
+  public long getJwtExpiration() {
+    return jwtExpiration;
+  }
 }

@@ -1,64 +1,60 @@
 package com.masteryhub.todoapp.models;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
-
-@Document(collection = "user")
-@TypeAlias("User")
+@Document(collection = "users")
+@Setter
+@Getter
 public class UserEntity {
 
-    @Id
-    private String id;
+  @Id private String id;
 
-    private String username;
+  private String username;
 
-    private String email;
+  private String email;
 
-    private String password;
+  private String password;
 
-    private List<TodoEntity> todolist;
+  private List<String> todos = new ArrayList<>();
 
-    public String getId() {
-        return id;
-    }
+  private List<String> friends = new ArrayList<>();
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  private Integer tokenVersion = 0;
 
-    public String getUsername() {
-        return username;
-    }
+  @Version private Long __v;
 
-    public String getEmail() {
-        return email;
-    }
+  public List<String> getTodosIds() {
+    return Collections.unmodifiableList(todos);
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public void setTodosIds(List<String> newTodosIds) {
+    this.todos = new ArrayList<>(newTodosIds);
+  }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+  public void addTodoId(String todoId) {
+    this.todos.add(todoId);
+  }
 
-    public String getPassword() {
-        return password;
-    }
+  public void removeTodoId(String todoId) {
+    this.todos.remove(todoId);
+  }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+  public void clearTodosIds() {
+    this.todos.clear();
+  }
 
-    public List<TodoEntity> getTodolist() {
-        return todolist;
-    }
+  public void addFriend(String username) {
+    this.friends.add(username);
+  }
 
-    public void setTodolist(List<TodoEntity> todolist) {
-        this.todolist = todolist;
-    }
-
+  public void removeFriend(String username) {
+    this.friends.remove(username);
+  }
 }

@@ -1,84 +1,57 @@
 package com.masteryhub.todoapp.models;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import com.masteryhub.todoapp.dto.RequestTodoDto;
+import java.time.Instant;
+import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.annotation.*;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+@Document(collection = "todos")
+@Setter
+@Getter
+@NoArgsConstructor
 public class TodoEntity {
 
-    private Long id;
-    private String title;
-    private String description;
-    private Status status;
+  @Id private String id;
 
-    @CreatedDate
-    @Field("created_at")
-    private String createdAt;
+  private String userId;
 
-    @LastModifiedDate
-    @Field("updated_at")
-    private String updatedAt;
+  private Long customId;
 
-    @Field("deleted_at")
-    private String deletedAt;
+  private String title;
 
-    public boolean isDeleted() {
-        return deletedAt != null;
-    }
+  private String description;
 
-    public Long getId() {
-        return id;
-    }
+  private Status status;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  @Field("tags")
+  private List<String> tags;
 
-    public String getTitle() {
-        return title;
-    }
+  @CreatedDate
+  @Field("created_at")
+  private Instant createdAt;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  @LastModifiedDate
+  @Field("updated_at")
+  private Instant updatedAt;
 
-    public String getDescription() {
-        return description;
-    }
+  @Field("deleted_at")
+  private Instant deletedAt;
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  @Field("due_date")
+  private Instant dueDate;
 
-    public Status getStatus() {
-        return status;
-    }
+  @Version private Long __v;
 
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(String updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public String getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(String deletedAt) {
-        this.deletedAt = deletedAt;
-    }
+  public TodoEntity(RequestTodoDto requestTodoDto) {
+    this.title = requestTodoDto.getTitle();
+    this.description = requestTodoDto.getDescription();
+    this.status = requestTodoDto.getStatus();
+    this.dueDate = requestTodoDto.getDueDate();
+    this.tags = requestTodoDto.getTags();
+  }
 }

@@ -4,54 +4,56 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
 import java.util.Date;
+import javax.crypto.SecretKey;
+import org.springframework.stereotype.Component;
 
 @Component
 public class JwtGenerator {
-    private static final String SECRET_KEY = SecurityConstants.SECRET_KEY;
 
-    public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
-        Date currentDate = new Date();
-        Date expireDate = new Date(currentDate.getTime() + SecurityConstants.JWT_EXPIRATION);
+  private final SecurityConstants securityConstants;
+  private final SecretKey signingKey;
 
-        String token = Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(expireDate)
-                .signWith(getSigningKey())
-                .compact();
-        return token;
+  public JwtGenerator(SecurityConstants securityConstants) {
+    this.securityConstants = securityConstants;
+    byte[] keyBytes = Decoders.BASE64.decode(securityConstants.getSecretKey());
+    this.signingKey = Keys.hmacShaKeyFor(keyBytes);
+  }
+
+  public String generateToken(UserDetailsImpl userDetails) {
+    String email = userDetails.getEmail();
+    Integer versionToken = userDetails.get__v();
+    Date currentDate = new Date();
+    Date expireDate = new Date(currentDate.getTime() + securityConstants.getJwtExpiration());
+
+    return Jwts.builder()
+        .setSubject(email)
+        .claim("versionToken", versionToken)
+        .setIssuedAt(currentDate)
+        .setExpiration(expireDate)
+        .signWith(signingKey)
+        .compact();
+  }
+
+  public String getUsernameFromJWT(String token) {
+    Claims claims =
+        Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token).getBody();
+    return claims.getSubject();
+  }
+
+  public Integer getVersionToken(String token) {
+    Claims claims =
+        Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token).getBody();
+    return claims.get("versionToken", Integer.class);
+  }
+
+  public boolean validateToken(String token) {
+    try {
+      Claims claims =
+          Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token).getBody();
+      return !claims.getExpiration().before(new Date());
+    } catch (Exception ex) {
+      return false;
     }
-
-    public String getUsernameFromJWT(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
-    }
-
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY)
-                    .build()
-                    .parseClaimsJws(token);
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
-    }
-
-    private SecretKey getSigningKey() {
-        byte[] KeyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(KeyBytes);
-    }
-
+  }
 }
