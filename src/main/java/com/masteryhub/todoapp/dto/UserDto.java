@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @AllArgsConstructor
-public class AuthenticationResponseDto {
-  private String verificationToken;
-  private UserDto user;
+public class UserDto {
+    private String username;
+    private String email;
 }

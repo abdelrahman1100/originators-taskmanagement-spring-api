@@ -15,7 +15,7 @@ public class UserController {
 
   @Autowired UserService userService;
 
-  @GetMapping("/get-all-frineds")
+  @GetMapping("/get-all-friends")
   public List<ResponseFriendsDto> getAllFriends() {
     return userService.getAllFriends();
   }
