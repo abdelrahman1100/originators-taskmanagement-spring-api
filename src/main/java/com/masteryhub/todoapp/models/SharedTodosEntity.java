@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Setter
 @Getter
 @NoArgsConstructor
-public class sharedTodosEntity {
+public class SharedTodosEntity {
 
   @Id private String id;
 
