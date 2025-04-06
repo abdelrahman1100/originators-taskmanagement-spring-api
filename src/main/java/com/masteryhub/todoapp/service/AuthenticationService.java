@@ -56,10 +56,18 @@ public class AuthenticationService {
             message.setMessage("Email is already taken!");
             return new ResponseEntity<>(message, HttpStatus.CONFLICT);
         }
+        if (!registerDto.getPassword().equals(registerDto.getConfirmPassword())) {
+            MessageDto message = new MessageDto();
+            message.setMessage("Passwords do not match!");
+            return new ResponseEntity<>(message, HttpStatus.CONFLICT);
+        }
         UserEntity user = new UserEntity();
         user.setUsername(registerDto.getUsername());
         user.setEmail(registerDto.getEmail());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+        user.setFullName(registerDto.getFullName());
+        user.setPhoneNumber(registerDto.getPhoneNumber());
+        user.setAddress(registerDto.getAddress());
         userRepository.save(user);
         MessageDto message = new MessageDto();
         // TODO: Change the message to be in json file

@@ -45,4 +45,9 @@ public class UserController {
     public ResponseEntity<UserSettingsDto> getUserSettings() {
         return userService.getUserSettings();
     }
+
+    @PatchMapping("/edit-profile")
+    public ResponseEntity<MessageDto> editProfile(@RequestBody EditProfileDto editProfileDto) {
+        return userService.editProfile(editProfileDto);
+    }
 }
