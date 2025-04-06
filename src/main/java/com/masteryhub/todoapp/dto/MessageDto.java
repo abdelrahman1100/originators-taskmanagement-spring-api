@@ -1,5 +1,6 @@
 package com.masteryhub.todoapp.dto;
 
+// TODO: add getter and setter methods to the class
 public class MessageDto {
   private String message;
 

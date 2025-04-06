@@ -62,6 +62,7 @@ public class AuthenticationService {
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         userRepository.save(user);
         MessageDto message = new MessageDto();
+        // TODO: Change the message to be in json file
         message.setMessage("User Registered Successfully!");
         return new ResponseEntity<>(message, HttpStatus.OK);
     }

@@ -45,12 +45,10 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             .findByEmail(email)
             .orElseGet(
                 () -> {
-                  System.out.println("User not found, creating new user...");
                   UserEntity newUser = new UserEntity();
                   newUser.setUsername(name);
                   newUser.setEmail(email);
                   UserEntity savedUser = userRepository.save(newUser);
-                  System.out.println(savedUser.getId());
                   return savedUser;
                 });
 

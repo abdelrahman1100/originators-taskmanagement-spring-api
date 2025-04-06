@@ -28,6 +28,8 @@ public class UserEntity {
 
   private Integer tokenVersion = 0;
 
+  private Settings settings = new Settings();
+
   @Version private Long __v;
 
   public List<String> getTodosIds() {

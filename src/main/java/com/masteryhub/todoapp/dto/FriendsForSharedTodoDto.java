@@ -1,6 +1,6 @@
 package com.masteryhub.todoapp.dto;
 
-import com.masteryhub.todoapp.models.Permision;
+import com.masteryhub.todoapp.models.Permission;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,5 +10,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class FriendsForSharedTodoDto {
   private String username;
-  private Permision permission;
+  private Permission permission;
 }
