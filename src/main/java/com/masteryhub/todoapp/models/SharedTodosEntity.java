@@ -23,7 +23,7 @@ public class SharedTodosEntity {
 
   private String friend;
 
-  private Permision permission;
+  private Permission permission;
 
   @CreatedDate
   @Field("created_at")

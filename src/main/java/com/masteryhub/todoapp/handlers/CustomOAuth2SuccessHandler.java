@@ -2,6 +2,7 @@ package com.masteryhub.todoapp.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.masteryhub.todoapp.dto.AuthenticationResponseDto;
+import com.masteryhub.todoapp.dto.UserDto;
 import com.masteryhub.todoapp.models.UserEntity;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtGenerator;
@@ -44,12 +45,10 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             .findByEmail(email)
             .orElseGet(
                 () -> {
-                  System.out.println("User not found, creating new user...");
                   UserEntity newUser = new UserEntity();
                   newUser.setUsername(name);
                   newUser.setEmail(email);
                   UserEntity savedUser = userRepository.save(newUser);
-                  System.out.println(savedUser.getId());
                   return savedUser;
                 });
 
@@ -61,7 +60,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     String token = jwtGenerator.generateToken(userDetails);
 
-    AuthenticationResponseDto authResponse = new AuthenticationResponseDto(token);
+    AuthenticationResponseDto authResponse = new AuthenticationResponseDto(token,new UserDto(user.getUsername(), user.getEmail()));
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
     response.getWriter().write(objectMapper.writeValueAsString(authResponse));

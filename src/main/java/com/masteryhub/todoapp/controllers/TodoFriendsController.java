@@ -41,12 +41,6 @@ public class TodoFriendsController {
     return todoFriendsService.getFriendsForSpecificTodo(id);
   }
 
-  //    @PutMapping("update-sharedtodo")
-  //    public ResponseEntity<MessageDto> updateSharedTodo(@RequestBody RequestTodoDto
-  // requestTodoDto) {
-  //        return todoFriendsService.updateSharedTodo(requestTodoDto);
-  //    }
-
   @PutMapping("update-sharedtodo-permission")
   public ResponseEntity<MessageDto> updateSharedTodoPermission(
       @RequestBody AddFriendDto addFriendDto, @RequestParam Long id) {

@@ -152,26 +152,4 @@ public class TodoFriendsService {
     return ResponseEntity.ok(new MessageDto("Shared todo permission updated"));
   }
 
-  //    public ResponseEntity<MessageDto> updateSharedTodo(RequestTodoDto requestTodoDto) {
-  //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-  //        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-  //        String email = userDetails.getEmail();
-  //        Optional<UserEntity> user = userRepository.findByEmail(email);
-  //        Optional<TodoEntity> todoOptional =
-  //                todoRepository.findByUserIdAndCustomIdAndDeletedAtIsNull(user.get().getId(),
-  // requestTodoDto.getId());
-  //        if (todoOptional.isEmpty()) {
-  //            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-  //        }
-  //        TodoEntity todo = todoOptional.get();
-  //        Optional<SharedTodosEntity> sharedTodoOptional =
-  //                sharedTodoRepository.findByTodoAndFriend(todo.getId(), user.get().getId());
-  //        if (sharedTodoOptional.isEmpty()) {
-  //            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-  //        }
-  //        SharedTodosEntity sharedTodo = sharedTodoOptional.get();
-  //        sharedTodo.setPermission(requestTodoDto.getPermission());
-  //        sharedTodoRepository.save(sharedTodo);
-  //        return ResponseEntity.ok(new MessageDto("Shared todo updated"));
-  //    }
 }

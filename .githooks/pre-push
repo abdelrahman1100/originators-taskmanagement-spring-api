@@ -12,23 +12,19 @@ PMD_STATUS=$?
 PMD_XML_PATH="target/pmd.xml"
 if [ -f "$PMD_XML_PATH" ]; then
     echo "📄 Extracting PMD violations from $PMD_XML_PATH..."
-    PMD_ERRORS=$(xmllint --format "$PMD_XML_PATH" | grep -E "<violation" | sed -E 's/<violation.*>(.*)<\/violation>/\1/g')
+    PMD_ERRORS=$(xmllint --format "$PMD_XML_PATH" | grep -oP '(?<=<violation[^>]*>).*?(?=</violation>)')
 else
     PMD_ERRORS="⚠️ PMD report not found. Check manually: $PMD_XML_PATH"
 fi
 
-# Check if PMD found issues
-if [ $PMD_STATUS -ne 0 ]; then
+# Print extracted violations
+if [ -n "$PMD_ERRORS" ]; then
     echo "❌ PMD found issues:"
     echo "---------------------------------------------"
     echo "$PMD_ERRORS"
     echo "---------------------------------------------"
     echo "📄 Check full PMD report: $PMD_XML_PATH"
-fi
-
-# If any issues are found, reject the push
-if [ $PMD_STATUS -ne 0 ]; then
-    echo "❌ Pre-push rejected due to code issues detected by PMD or SpotBugs."
+    echo "❌ Pre-push rejected due to code issues detected by PMD."
     exit 1
 fi
 

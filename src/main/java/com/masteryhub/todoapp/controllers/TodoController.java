@@ -8,26 +8,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/todo")
+@RequestMapping("/todos")
 public class TodoController {
 
   @Autowired TodoService todoService;
 
-  @PostMapping("/create-todo")
+  @PostMapping("/")
   public ResponseEntity<ResponseTodoDto> createTodo(@RequestBody RequestTodoDto requestTodoDto) {
     return todoService.createTodo(requestTodoDto);
   }
 
-  @GetMapping("/get-todo")
-  public ResponseEntity<ResponseTodoDto> getTodo(@RequestParam("id") Long id) {
+  @GetMapping("/{id}")
+  public ResponseEntity<ResponseTodoDto> getTodo(@PathVariable("id") Long id) {
     return todoService.getTodo(id);
   }
 
-  @GetMapping("/get-todos")
+  @GetMapping("/")
   public ResponseEntity<List<ResponseTodoDto>> getTodos(
       @RequestParam(name = "page", defaultValue = "0") int page,
-      @RequestParam(name = "size", defaultValue = "10") int size) {
-    return todoService.getTodos(page, size);
+      @RequestParam(name = "size", defaultValue = "10") int limit) {
+    return todoService.getTodos(page, limit);
   }
 
   @GetMapping("/filter-todos")
@@ -38,9 +38,9 @@ public class TodoController {
     return todoService.filterTodos(requestTodoDto, page, size);
   }
 
-  @PutMapping("/edit-todo")
+  @PutMapping("/{id}")
   public ResponseEntity<ResponseTodoDto> editTodo(
-      @RequestBody RequestTodoDto requestTodoDto, @RequestParam("id") Long id) {
+      @RequestBody RequestTodoDto requestTodoDto, @PathVariable("id") Long id) {
     return todoService.editTodo(requestTodoDto, id);
   }
 
@@ -51,8 +51,8 @@ public class TodoController {
     return todoService.editManyTodos(requestTodoDtoList);
   }
 
-  @DeleteMapping("/soft-delete-todo")
-  public ResponseEntity<MessageDto> softDeleteTodo(@RequestParam("id") Long id) {
+  @DeleteMapping("/id")
+  public ResponseEntity<MessageDto> softDeleteTodo(@PathVariable("id") Long id) {
     return todoService.softDeleteTodo(id);
   }
 

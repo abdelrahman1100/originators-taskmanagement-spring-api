@@ -9,4 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuthenticationResponseDto {
   private String verificationToken;
+  private UserDto user;
 }
