@@ -3,6 +3,7 @@ package com.masteryhub.todoapp.models;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -14,49 +15,57 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 public class UserEntity {
 
-  @Id private String id;
+    @Id
+    private String id;
 
-  private String username;
+    private String username;
 
-  private String email;
+    private String fullName;
 
-  private String password;
+    private String email;
 
-  private List<String> todos = new ArrayList<>();
+    private String phoneNumber;
 
-  private List<String> friends = new ArrayList<>();
+    private String address;
 
-  private Integer tokenVersion = 0;
+    private String password;
 
-  private Settings settings = new Settings();
+    private List<String> todos = new ArrayList<>();
 
-  @Version private Long __v;
+    private List<String> friends = new ArrayList<>();
 
-  public List<String> getTodosIds() {
-    return Collections.unmodifiableList(todos);
-  }
+    private Integer tokenVersion = 0;
 
-  public void setTodosIds(List<String> newTodosIds) {
-    this.todos = new ArrayList<>(newTodosIds);
-  }
+    private Settings settings = new Settings();
 
-  public void addTodoId(String todoId) {
-    this.todos.add(todoId);
-  }
+    @Version
+    private Long __v;
 
-  public void removeTodoId(String todoId) {
-    this.todos.remove(todoId);
-  }
+    public List<String> getTodosIds() {
+        return Collections.unmodifiableList(todos);
+    }
 
-  public void clearTodosIds() {
-    this.todos.clear();
-  }
+    public void setTodosIds(List<String> newTodosIds) {
+        this.todos = new ArrayList<>(newTodosIds);
+    }
 
-  public void addFriend(String username) {
-    this.friends.add(username);
-  }
+    public void addTodoId(String todoId) {
+        this.todos.add(todoId);
+    }
 
-  public void removeFriend(String username) {
-    this.friends.remove(username);
-  }
+    public void removeTodoId(String todoId) {
+        this.todos.remove(todoId);
+    }
+
+    public void clearTodosIds() {
+        this.todos.clear();
+    }
+
+    public void addFriend(String username) {
+        this.friends.add(username);
+    }
+
+    public void removeFriend(String username) {
+        this.friends.remove(username);
+    }
 }

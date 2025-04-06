@@ -119,4 +119,20 @@ public class UserService {
         userSettingsDto.setSettings(user.get().getSettings());
         return ResponseEntity.ok(userSettingsDto);
     }
+
+    public ResponseEntity<MessageDto> editProfile(EditProfileDto editProfileDto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        String email = userDetails.getEmail();
+        Optional<UserEntity> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+        }
+        UserEntity userEntity = user.get();
+        userEntity.setFullName(editProfileDto.getFullName());
+        userEntity.setPhoneNumber(editProfileDto.getPhoneNumber());
+        userEntity.setAddress(editProfileDto.getAddress());
+        userRepository.save(userEntity);
+        return ResponseEntity.ok(new MessageDto("Profile updated"));
+    }
 }
