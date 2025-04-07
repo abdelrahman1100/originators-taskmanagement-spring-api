@@ -7,11 +7,7 @@ import com.masteryhub.todoapp.repository.TodoRepository;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.UserDetailsImpl;
 
-import java.awt.*;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,7 +137,7 @@ public class UserService {
         return ResponseEntity.ok(new MessageDto("Profile updated"));
     }
 
-    public ResponseEntity<MessageDto> addFriendToTodo(AddFriendDto addFriendDto, Long id) {
+    public ResponseEntity<MessageDto> addFriendToTodo(AddFriendToTodoDto addFriendToTodoDto, Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         String email = userDetails.getEmail();
@@ -153,18 +149,128 @@ public class UserService {
         if (todo.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageDto("Todo not found"));
         }
-        if (todo.get().getFriendByUsername(addFriendDto.getUsername()) != null) {
+        if (todo.get().getFriendByUsername(addFriendToTodoDto.getUsername()) != null) {
             return ResponseEntity.badRequest().body(new MessageDto("Friend already exists"));
         }
-        if (userRepository.findByUsername(addFriendDto.getUsername()).isEmpty()) {
+        if (userRepository.findByUsername(addFriendToTodoDto.getUsername()).isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageDto("User not found"));
         }
-        if (!user.get().getFriends().contains(addFriendDto.getUsername())) {
+        if (!user.get().getFriends().contains(addFriendToTodoDto.getUsername())) {
             return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
         }
         TodoEntity todoEntity = todo.get();
-        todoEntity.addFriend(addFriendDto);
+        todoEntity.addFriend(addFriendToTodoDto);
         todoRepository.save(todoEntity);
         return ResponseEntity.ok(new MessageDto("Friend added to todo"));
+    }
+
+    public ResponseEntity<MessageDto> removeFriendFromTodo(RemoveFriendDto removeFriendDto, Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        String email = userDetails.getEmail();
+        Optional<UserEntity> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+        }
+        Optional<TodoEntity> todo = todoRepository.findByUserIdAndCustomId(user.get().getId(), id);
+        if (todo.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageDto("Todo not found"));
+        }
+        TodoEntity todoEntity = todo.get();
+        if (todoEntity.getFriendByUsername(removeFriendDto.getUsername()) == null) {
+            return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
+        }
+        if (userRepository.findByUsername(removeFriendDto.getUsername()).isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+        }
+        if (!user.get().getFriends().contains(removeFriendDto.getUsername())) {
+            return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
+        }
+        todoEntity.removeFriend(removeFriendDto.getUsername());
+        todoRepository.save(todoEntity);
+        return ResponseEntity.ok(new MessageDto("Friend removed from todo"));
+    }
+
+    public ResponseEntity<List<ResponseTodoDto>> getSharedTodos() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        String email = userDetails.getEmail();
+        Optional<UserEntity> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
+        List<TodoEntity> todos = todoRepository.findByFriendsUsername(user.get().getUsername());
+        List<ResponseTodoDto> responseTodoDtos = todos.stream().map(ResponseTodoDto::from).toList();
+        return ResponseEntity.ok(responseTodoDtos);
+    }
+
+
+    public ResponseEntity<List<ResponseFriendsDto>> getSharedTodoFriends(Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        String email = userDetails.getEmail();
+        Optional<UserEntity> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
+        Optional<TodoEntity> todo = todoRepository.findByUserIdAndCustomId(user.get().getId(), id);
+        if (todo.isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
+        List<ResponseFriendsDto> responseFriendsDtos = new ArrayList<>();
+        for (AddFriendToTodoDto friend : todo.get().getFriends()) {
+            responseFriendsDtos.add(new ResponseFriendsDto(friend.getUsername()));
+        }
+        return ResponseEntity.ok(responseFriendsDtos);
+    }
+
+
+    public ResponseEntity<MessageDto> editFriendPermission(AddFriendToTodoDto addFriendToTodoDto, Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        String email = userDetails.getEmail();
+        Optional<UserEntity> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+        }
+        Optional<TodoEntity> todo = todoRepository.findByUserIdAndCustomId(user.get().getId(), id);
+        if (todo.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageDto("Todo not found"));
+        }
+        TodoEntity todoEntity = todo.get();
+        if (todoEntity.getFriendByUsername(addFriendToTodoDto.getUsername()) == null) {
+            return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
+        }
+        if (userRepository.findByUsername(addFriendToTodoDto.getUsername()).isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+        }
+        if (!user.get().getFriends().contains(addFriendToTodoDto.getUsername())) {
+            return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
+        }
+        todoEntity.editFriendPermission(addFriendToTodoDto);
+        todoRepository.save(todoEntity);
+        return ResponseEntity.ok(new MessageDto("Friend permission updated"));
+    }
+
+
+    public ResponseEntity<MessageDto> editSharedTodo(RequestTodoDto requestTodoDto, Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        String email = userDetails.getEmail();
+        Optional<UserEntity> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+        }
+        TodoEntity todo = todoRepository.findByFriendsUsernameAndCustomId(user.get().getUsername(), id);
+        if (todo == null) {
+            return ResponseEntity.badRequest().body(new MessageDto("Todo not found"));
+        }
+        TodoEntity todoEntity = todo;
+        todoEntity.setTitle(requestTodoDto.getTitle());
+        todoEntity.setDescription(requestTodoDto.getDescription());
+        todoEntity.setDueDate(requestTodoDto.getDueDate());
+        todoEntity.setStatus(requestTodoDto.getStatus());
+        todoRepository.save(todoEntity);
+        return ResponseEntity.ok(new MessageDto("Shared Todo updated"));
     }
 }
