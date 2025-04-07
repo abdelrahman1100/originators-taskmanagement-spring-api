@@ -50,4 +50,16 @@ public class UserController {
     public ResponseEntity<MessageDto> editProfile(@RequestBody EditProfileDto editProfileDto) {
         return userService.editProfile(editProfileDto);
     }
+
+//    /user GET
+//    /user/{id} GET
+//    /user/{id} DELETE
+//    /user/{id} PATCH
+    // /USER/{id}/edit
+//    /user/{id}/profile/edit
+    // /products/{id}/profile/image/upload/{id}/image/asd/asd /asd/asd/asd
+    // /customers/{id}/profile/edit
+//    /user/{id}/todos GET
+//    /user/{id}/todos/{todoId} GET
+//    /user/{id}/todos/{todoId} DELETE
 }

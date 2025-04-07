@@ -89,7 +89,7 @@ public class UserService {
         if (user.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageDto("User not found"));
         }
-        user.get().getSettings().getTheme().setIsLight(displayModeDto.getDisplaymode());
+        user.get().getSettings().getTheme().setIsLight(displayModeDto.getDisplayMode());
         userRepository.save(user.get());
         return ResponseEntity.ok(new MessageDto("Display mode updated"));
     }
@@ -126,6 +126,7 @@ public class UserService {
         String email = userDetails.getEmail();
         Optional<UserEntity> user = userRepository.findByEmail(email);
         if (user.isEmpty()) {
+            // todo: change it to be key value pair
             return ResponseEntity.badRequest().body(new MessageDto("User not found"));
         }
         UserEntity userEntity = user.get();

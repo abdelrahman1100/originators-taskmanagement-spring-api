@@ -222,8 +222,8 @@ public class TodoService {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         String email = userDetails.getEmail();
         Optional<UserEntity> user = userRepository.findByEmail(email);
-        List<String> todosids = user.get().getTodosIds();
-        List<TodoEntity> todoRes = todoRepository.findAllById(todosids);
+        List<String> todosIds = user.get().getTodosIds();
+        List<TodoEntity> todoRes = todoRepository.findAllById(todosIds);
         if (todoRes.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

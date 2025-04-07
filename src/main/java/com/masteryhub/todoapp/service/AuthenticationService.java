@@ -90,6 +90,7 @@ public class AuthenticationService {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         String email = userDetails.getEmail();
         Optional<UserEntity> user = userRepository.findByEmail(email);
+        // todo: to be configured
         user.get().setTokenVersion((user.get().getTokenVersion() + 1) % 1024);
         userRepository.save(user.get());
         MessageDto message = new MessageDto();
