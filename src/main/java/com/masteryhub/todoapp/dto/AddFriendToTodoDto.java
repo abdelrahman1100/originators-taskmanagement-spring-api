@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class AddFriendDto {
+public class AddFriendToTodoDto {
   private String username;
   private Permission permission;
 }

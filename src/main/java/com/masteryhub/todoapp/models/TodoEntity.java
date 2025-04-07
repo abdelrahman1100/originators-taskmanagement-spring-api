@@ -1,6 +1,6 @@
 package com.masteryhub.todoapp.models;
 
-import com.masteryhub.todoapp.dto.AddFriendDto;
+import com.masteryhub.todoapp.dto.AddFriendToTodoDto;
 import com.masteryhub.todoapp.dto.RequestTodoDto;
 
 import java.time.Instant;
@@ -35,7 +35,7 @@ public class TodoEntity {
 
     private Permission permission;
 
-    private List<AddFriendDto> friends = new ArrayList<>();
+    private List<AddFriendToTodoDto> friends = new ArrayList<>();
 
     @Field("tags")
     private List<String> tags;
@@ -68,20 +68,34 @@ public class TodoEntity {
         }
     }
 
-    public void addFriend(AddFriendDto friend) {
+    public void addFriend(AddFriendToTodoDto friend) {
         this.friends.add(friend);
     }
 
-    public void removeFriend(UserEntity friend) {
-        this.friends.remove(friend);
+    public void removeFriend(String friend) {
+        for (int i = 0; i < friends.size(); i++) {
+            if (friends.get(i).getUsername().equals(friend)) {
+                friends.remove(i);
+                break;
+            }
+        }
     }
 
     public String getFriendByUsername(String username) {
-        for (AddFriendDto friend : friends) {
+        for (AddFriendToTodoDto friend : friends) {
             if (friend.getUsername().equals(username)) {
                 return friend.getUsername();
             }
         }
         return null;
+    }
+
+    public void editFriendPermission(AddFriendToTodoDto addFriendToTodoDto) {
+        for (AddFriendToTodoDto friend : friends) {
+            if (friend.getUsername().equals(addFriendToTodoDto.getUsername())) {
+                friend.setPermission(addFriendToTodoDto.getPermission());
+                break;
+            }
+        }
     }
 }

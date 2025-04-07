@@ -52,8 +52,33 @@ public class UserController {
     }
 
     @PostMapping("/add/friend/todo/{id}")
-    public ResponseEntity<MessageDto> addFriendToTodo(@RequestBody AddFriendDto addFriendDto,@PathVariable Long id) {
-        return userService.addFriendToTodo(addFriendDto,id);
+    public ResponseEntity<MessageDto> addFriendToTodo(@RequestBody AddFriendToTodoDto addFriendToTodoDto, @PathVariable Long id) {
+        return userService.addFriendToTodo(addFriendToTodoDto, id);
+    }
+
+    @DeleteMapping("/remove/friend/todo/{id}")
+    public ResponseEntity<MessageDto> removeFriendFromTodo(@RequestBody RemoveFriendDto removeFriendDto, @PathVariable Long id) {
+        return userService.removeFriendFromTodo(removeFriendDto, id);
+    }
+
+    @GetMapping("/shared/todos")
+    public ResponseEntity<List<ResponseTodoDto>> getSharedTodos() {
+        return userService.getSharedTodos();
+    }
+
+    @GetMapping("/todo/friends/{id}")
+    public ResponseEntity<List<ResponseFriendsDto>> getSharedTodoFriends(@PathVariable Long id) {
+        return userService.getSharedTodoFriends(id);
+    }
+
+    @PatchMapping("/edit/friend/permission/{id}")
+    public ResponseEntity<MessageDto> editFriendPermission(@RequestBody AddFriendToTodoDto addFriendToTodoDto, @PathVariable Long id) {
+        return userService.editFriendPermission(addFriendToTodoDto, id);
+    }
+
+    @PatchMapping("/edit/sharedtodo/{id}")
+    public ResponseEntity<MessageDto> editSharedTodo(@RequestBody RequestTodoDto requestTodoDto, @PathVariable Long id) {
+        return userService.editSharedTodo(requestTodoDto, id);
     }
 
 }
