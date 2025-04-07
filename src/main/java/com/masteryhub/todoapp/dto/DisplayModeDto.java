@@ -6,5 +6,5 @@ import lombok.Setter;
 @Setter
 @Getter
 public class DisplayModeDto {
-    private Boolean displaymode;
+    private Boolean displayMode;
 }
