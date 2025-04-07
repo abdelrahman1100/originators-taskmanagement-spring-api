@@ -1,7 +1,9 @@
 package com.masteryhub.todoapp.service;
 
 import com.masteryhub.todoapp.dto.*;
+import com.masteryhub.todoapp.models.TodoEntity;
 import com.masteryhub.todoapp.models.UserEntity;
+import com.masteryhub.todoapp.repository.TodoRepository;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.UserDetailsImpl;
 
@@ -22,10 +24,12 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     UserRepository userRepository;
+    TodoRepository todoRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, TodoRepository todoRepository) {
         this.userRepository = userRepository;
+        this.todoRepository = todoRepository;
     }
 
     public List<ResponseFriendsDto> getAllFriends() {
@@ -135,5 +139,32 @@ public class UserService {
         userEntity.setAddress(editProfileDto.getAddress());
         userRepository.save(userEntity);
         return ResponseEntity.ok(new MessageDto("Profile updated"));
+    }
+
+    public ResponseEntity<MessageDto> addFriendToTodo(AddFriendDto addFriendDto, Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        String email = userDetails.getEmail();
+        Optional<UserEntity> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+        }
+        Optional<TodoEntity> todo = todoRepository.findByUserIdAndCustomId(user.get().getId(), id);
+        if (todo.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageDto("Todo not found"));
+        }
+        if (todo.get().getFriendByUsername(addFriendDto.getUsername()) != null) {
+            return ResponseEntity.badRequest().body(new MessageDto("Friend already exists"));
+        }
+        if (userRepository.findByUsername(addFriendDto.getUsername()).isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+        }
+        if (!user.get().getFriends().contains(addFriendDto.getUsername())) {
+            return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
+        }
+        TodoEntity todoEntity = todo.get();
+        todoEntity.addFriend(addFriendDto);
+        todoRepository.save(todoEntity);
+        return ResponseEntity.ok(new MessageDto("Friend added to todo"));
     }
 }

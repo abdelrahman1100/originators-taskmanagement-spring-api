@@ -1,5 +1,10 @@
 package com.masteryhub.todoapp.models;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class Settings {
     private Theme theme;
 
@@ -8,14 +13,6 @@ public class Settings {
     }
 
     public Settings(Theme theme) {
-        this.theme = theme;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public void setTheme(Theme theme) {
         this.theme = theme;
     }
 }
