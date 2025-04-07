@@ -1,8 +1,10 @@
 package com.masteryhub.todoapp.models;
 
+import com.masteryhub.todoapp.dto.AddFriendDto;
 import com.masteryhub.todoapp.dto.RequestTodoDto;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
@@ -30,6 +32,10 @@ public class TodoEntity {
     private String description;
 
     private Status status;
+
+    private Permission permission;
+
+    private List<AddFriendDto> friends = new ArrayList<>();
 
     @Field("tags")
     private List<String> tags;
@@ -60,5 +66,22 @@ public class TodoEntity {
         if (requestTodoDto.getStatus() == null) {
             this.status = Status.todo;
         }
+    }
+
+    public void addFriend(AddFriendDto friend) {
+        this.friends.add(friend);
+    }
+
+    public void removeFriend(UserEntity friend) {
+        this.friends.remove(friend);
+    }
+
+    public String getFriendByUsername(String username) {
+        for (AddFriendDto friend : friends) {
+            if (friend.getUsername().equals(username)) {
+                return friend.getUsername();
+            }
+        }
+        return null;
     }
 }

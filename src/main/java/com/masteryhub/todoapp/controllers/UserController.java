@@ -51,15 +51,9 @@ public class UserController {
         return userService.editProfile(editProfileDto);
     }
 
-//    /user GET
-//    /user/{id} GET
-//    /user/{id} DELETE
-//    /user/{id} PATCH
-    // /USER/{id}/edit
-//    /user/{id}/profile/edit
-    // /products/{id}/profile/image/upload/{id}/image/asd/asd /asd/asd/asd
-    // /customers/{id}/profile/edit
-//    /user/{id}/todos GET
-//    /user/{id}/todos/{todoId} GET
-//    /user/{id}/todos/{todoId} DELETE
+    @PostMapping("/add/friend/todo/{id}")
+    public ResponseEntity<MessageDto> addFriendToTodo(@RequestBody AddFriendDto addFriendDto,@PathVariable Long id) {
+        return userService.addFriendToTodo(addFriendDto,id);
+    }
+
 }
