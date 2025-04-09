@@ -14,7 +14,7 @@ public class MongoConfig {
 
   @Bean
   public MongoTemplate mongoTemplate(
-     MongoDatabaseFactory factory, MappingMongoConverter converter) {
+      MongoDatabaseFactory factory, MappingMongoConverter converter) {
     // Remove _class from documents
     converter.setTypeMapper(new DefaultMongoTypeMapper(null));
     return new MongoTemplate(factory, converter);

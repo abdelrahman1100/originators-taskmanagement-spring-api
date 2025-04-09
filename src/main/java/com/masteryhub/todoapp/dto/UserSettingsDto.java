@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 @Getter
 public class UserSettingsDto {
-    private Settings settings;
+  private Settings settings;
 }

@@ -60,7 +60,8 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     String token = jwtGenerator.generateToken(userDetails);
 
-    AuthenticationResponseDto authResponse = new AuthenticationResponseDto(token,new UserDto(user.getUsername(), user.getEmail()));
+    AuthenticationResponseDto authResponse =
+        new AuthenticationResponseDto(token, new UserDto(user.getUsername(), user.getEmail()));
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
     response.getWriter().write(objectMapper.writeValueAsString(authResponse));
