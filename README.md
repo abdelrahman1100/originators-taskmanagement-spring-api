@@ -1,4 +1,4 @@
-# Originators Todo List API
+# Originators Task Management API
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Spring_Framework_Logo_2018.svg" alt="Spring Boot Logo" width="200">
 
