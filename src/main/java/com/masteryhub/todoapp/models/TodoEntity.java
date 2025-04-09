@@ -1,10 +1,10 @@
 package com.masteryhub.todoapp.models;
 
+import com.masteryhub.todoapp.dto.AddFriendToTodoDto;
 import com.masteryhub.todoapp.dto.RequestTodoDto;
-
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,47 +18,80 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @NoArgsConstructor
 public class TodoEntity {
 
-    @Id
-    private String id;
+  @Id private String id;
 
-    private String userId;
+  private String userId;
 
-    private Long customId;
+  private Long customId;
 
-    private String title;
+  private String title;
 
-    private String description;
+  private String description;
 
-    private Status status;
+  private Status status;
 
-    @Field("tags")
-    private List<String> tags;
+  private Permission permission;
 
-    @CreatedDate
-    @Field("created_at")
-    private Instant createdAt;
+  private List<AddFriendToTodoDto> friends = new ArrayList<>();
 
-    @LastModifiedDate
-    @Field("updated_at")
-    private Instant updatedAt;
+  @Field("tags")
+  private List<String> tags;
 
-    @Field("deleted_at")
-    private Instant deletedAt;
+  @CreatedDate
+  @Field("created_at")
+  private Instant createdAt;
 
-    @Field("due_date")
-    private Instant dueDate;
+  @LastModifiedDate
+  @Field("updated_at")
+  private Instant updatedAt;
 
-    @Version
-    private Long __v;
+  @Field("deleted_at")
+  private Instant deletedAt;
 
-    public TodoEntity(RequestTodoDto requestTodoDto) {
-        this.title = requestTodoDto.getTitle();
-        this.description = requestTodoDto.getDescription();
-        this.status = requestTodoDto.getStatus();
-        this.dueDate = requestTodoDto.getDueDate();
-        this.tags = requestTodoDto.getTags();
-        if (requestTodoDto.getStatus() == null) {
-            this.status = Status.todo;
-        }
+  @Field("due_date")
+  private Instant dueDate;
+
+  @Version private Long __v;
+
+  public TodoEntity(RequestTodoDto requestTodoDto) {
+    this.title = requestTodoDto.getTitle();
+    this.description = requestTodoDto.getDescription();
+    this.status = requestTodoDto.getStatus();
+    this.dueDate = requestTodoDto.getDueDate();
+    this.tags = requestTodoDto.getTags();
+    if (requestTodoDto.getStatus() == null) {
+      this.status = Status.todo;
     }
+  }
+
+  public void addFriend(AddFriendToTodoDto friend) {
+    this.friends.add(friend);
+  }
+
+  public void removeFriend(String friend) {
+    for (int i = 0; i < friends.size(); i++) {
+      if (friends.get(i).getUsername().equals(friend)) {
+        friends.remove(i);
+        break;
+      }
+    }
+  }
+
+  public String getFriendByUsername(String username) {
+    for (AddFriendToTodoDto friend : friends) {
+      if (friend.getUsername().equals(username)) {
+        return friend.getUsername();
+      }
+    }
+    return null;
+  }
+
+  public void editFriendPermission(AddFriendToTodoDto addFriendToTodoDto) {
+    for (AddFriendToTodoDto friend : friends) {
+      if (friend.getUsername().equals(addFriendToTodoDto.getUsername())) {
+        friend.setPermission(addFriendToTodoDto.getPermission());
+        break;
+      }
+    }
+  }
 }

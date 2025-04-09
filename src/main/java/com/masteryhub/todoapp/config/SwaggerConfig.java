@@ -20,7 +20,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
   public Docket api() {
     return new Docket(DocumentationType.SWAGGER_2)
         .select()
-        .apis(RequestHandlerSelectors.basePackage("com.example.to_do_list.controller"))
+        .apis(RequestHandlerSelectors.basePackage("com.masteryhub.todoapp.controller"))
         .paths(PathSelectors.regex("/.*"))
         .build()
         .apiInfo(apiInfoMetaData());
@@ -31,6 +31,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
     return new ApiInfoBuilder()
         .title("TODO List API")
         .description("API Endpoint Decoration")
+        .version("1.0.0")
         .contact(
             new Contact(
                 "Dev-Team", "https://www.masteryhub-its.com/", "abdulrahmantarek0.1@gmail.com"))

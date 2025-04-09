@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface TodoRepository extends MongoRepository<TodoEntity, String> {
   List<TodoEntity> findByCustomId(Long customId);
 
+  // TODO: remove In from all method names
   List<TodoEntity> findAllByCustomIdIn(List<Long> customIds);
 
   Page<TodoEntity> findAllByIdIn(List<String> ids, Pageable pageable);
@@ -48,4 +49,8 @@ public interface TodoRepository extends MongoRepository<TodoEntity, String> {
   Optional<TodoEntity> findByUserIdAndCustomIdAndDeletedAtIsNotNull(String id, Long id1);
 
   List<TodoEntity> findByUserIdAndCustomIdInAndDeletedAtIsNotNull(String id, List<Long> idList);
+
+  List<TodoEntity> findByFriendsUsername(String username);
+
+  TodoEntity findByFriendsUsernameAndCustomId(String username, Long id);
 }

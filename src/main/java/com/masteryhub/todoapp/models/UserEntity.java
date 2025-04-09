@@ -18,7 +18,13 @@ public class UserEntity {
 
   private String username;
 
+  private String fullName;
+
   private String email;
+
+  private String phoneNumber;
+
+  private String address;
 
   private String password;
 
@@ -27,6 +33,10 @@ public class UserEntity {
   private List<String> friends = new ArrayList<>();
 
   private Integer tokenVersion = 0;
+
+  private ProfileImage profileImage = new ProfileImage();
+
+  private Settings settings = new Settings();
 
   @Version private Long __v;
 
