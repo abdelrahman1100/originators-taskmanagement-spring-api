@@ -20,6 +20,9 @@ The **Originators Todo APP API** is a Spring Boot-based backend service for mana
 - **Build Tool:** Maven
 - **Deployment:** Docker
 
+## Design
+You can view the Figma design for the app [here](https://www.figma.com/design/ve6hnGr2CgVvtiQDEGwdTA/Originators---Todo-App?node-id=1-2&p=f&t=0UABcXNeEsPGrvP7-0).
+
 ## Setup Instructions
 ### How to Clone the Project
 1. Open a terminal or command prompt.
