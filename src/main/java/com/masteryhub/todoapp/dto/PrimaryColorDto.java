@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 @Getter
 public class PrimaryColorDto {
-    private PrimaryColor primaryColor;
+  private PrimaryColor primaryColor;
 }
