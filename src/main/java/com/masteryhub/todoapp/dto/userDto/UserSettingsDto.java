@@ -1,6 +1,6 @@
-package com.masteryhub.todoapp.dto;
+package com.masteryhub.todoapp.dto.userDto;
 
-import com.masteryhub.todoapp.models.Settings;
+import com.masteryhub.todoapp.models.settingsModel.Settings;
 import lombok.Getter;
 import lombok.Setter;
 

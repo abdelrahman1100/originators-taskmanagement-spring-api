@@ -1,4 +1,4 @@
-package com.masteryhub.todoapp.models;
+package com.masteryhub.todoapp.models.todoModel;
 
 public enum Permission {
   READ,

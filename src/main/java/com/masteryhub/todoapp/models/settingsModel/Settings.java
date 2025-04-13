@@ -1,4 +1,4 @@
-package com.masteryhub.todoapp.models;
+package com.masteryhub.todoapp.models.settingsModel;
 
 import lombok.Getter;
 import lombok.Setter;

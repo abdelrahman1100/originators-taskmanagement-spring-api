@@ -1,7 +1,11 @@
 package com.masteryhub.todoapp.service;
 
-import com.masteryhub.todoapp.dto.*;
-import com.masteryhub.todoapp.models.UserEntity;
+import com.masteryhub.todoapp.dto.messageDto.MessageDto;
+import com.masteryhub.todoapp.dto.userDto.AuthenticationResponseDto;
+import com.masteryhub.todoapp.dto.userDto.LoginDto;
+import com.masteryhub.todoapp.dto.userDto.RegisterDto;
+import com.masteryhub.todoapp.dto.userDto.UserDto;
+import com.masteryhub.todoapp.models.userModel.UserEntity;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtGenerator;
 import com.masteryhub.todoapp.security.UserDetailsImpl;
@@ -68,7 +72,6 @@ public class AuthenticationService {
     user.setAddress(registerDto.getAddress());
     userRepository.save(user);
     MessageDto message = new MessageDto();
-    // TODO: Change the message to be in json file
     message.setMessage("User Registered Successfully!");
     return new ResponseEntity<>(message, HttpStatus.OK);
   }
@@ -91,7 +94,6 @@ public class AuthenticationService {
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
-    // todo: to be configured
     user.get().setTokenVersion((user.get().getTokenVersion() + 1) % 1024);
     userRepository.save(user.get());
     MessageDto message = new MessageDto();

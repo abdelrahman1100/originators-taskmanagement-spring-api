@@ -1,9 +1,12 @@
 package com.masteryhub.todoapp.service;
 
-import com.masteryhub.todoapp.dto.*;
-import com.masteryhub.todoapp.models.ProfileImage;
-import com.masteryhub.todoapp.models.TodoEntity;
-import com.masteryhub.todoapp.models.UserEntity;
+import com.masteryhub.todoapp.dto.messageDto.MessageDto;
+import com.masteryhub.todoapp.dto.todoDto.RequestTodoDto;
+import com.masteryhub.todoapp.dto.todoDto.ResponseTodoDto;
+import com.masteryhub.todoapp.dto.userDto.*;
+import com.masteryhub.todoapp.models.todoModel.TodoEntity;
+import com.masteryhub.todoapp.models.userModel.ProfileImage;
+import com.masteryhub.todoapp.models.userModel.UserEntity;
 import com.masteryhub.todoapp.repository.TodoRepository;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.UserDetailsImpl;
@@ -80,38 +83,25 @@ public class UserService {
     return ResponseEntity.ok(new MessageDto("Friend removed"));
   }
 
-  public ResponseEntity<MessageDto> editDisplayMode(DisplayModeDto displayModeDto) {
+  public ResponseEntity<MessageDto> editSettings(SettingsDto settingsDto, String username) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
-    if (user.isEmpty()) {
+    if (user.isEmpty() || !username.equals(userDetails.getUsername())) {
       return ResponseEntity.badRequest().body(new MessageDto("User not found"));
     }
-    user.get().getSettings().getTheme().setIsLight(displayModeDto.getDisplayMode());
-    userRepository.save(user.get());
-    return ResponseEntity.ok(new MessageDto("Display mode updated"));
-  }
-
-  public ResponseEntity<MessageDto> editTheme(PrimaryColorDto primaryColorDto) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    String email = userDetails.getEmail();
-    Optional<UserEntity> user = userRepository.findByEmail(email);
-    if (user.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
-    }
-    user.get().getSettings().getTheme().setPrimaryColor(primaryColorDto.getPrimaryColor());
+    user.get().getSettings().getTheme().setPrimaryColor(settingsDto.getTheme().getPrimaryColor());
     userRepository.save(user.get());
     return ResponseEntity.ok(new MessageDto("Theme updated"));
   }
 
-  public ResponseEntity<UserSettingsDto> getUserSettings() {
+  public ResponseEntity<UserSettingsDto> getUserSettings(String username) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
-    if (user.isEmpty()) {
+    if (user.isEmpty() || !username.equals(userDetails.getUsername())) {
       return ResponseEntity.badRequest().body(new UserSettingsDto());
     }
     UserSettingsDto userSettingsDto = new UserSettingsDto();
@@ -119,13 +109,12 @@ public class UserService {
     return ResponseEntity.ok(userSettingsDto);
   }
 
-  public ResponseEntity<MessageDto> editProfile(EditProfileDto editProfileDto) {
+  public ResponseEntity<MessageDto> editProfile(EditProfileDto editProfileDto, String username) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
-    if (user.isEmpty()) {
-      // todo: change it to be key value pair
+    if (user.isEmpty() || !username.equals(userDetails.getUsername())) {
       return ResponseEntity.badRequest().body(new MessageDto("User not found"));
     }
     UserEntity userEntity = user.get();
@@ -272,12 +261,12 @@ public class UserService {
     return ResponseEntity.ok(new MessageDto("Shared Todo updated"));
   }
 
-  public ResponseEntity<MessageDto> uploadImage(ProfileImageDto profileImageDto) {
+  public ResponseEntity<MessageDto> uploadImage(ProfileImageDto profileImageDto, String username) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
-    if (user.isEmpty()) {
+    if (user.isEmpty() || !username.equals(userDetails.getUsername())) {
       return ResponseEntity.badRequest().body(new MessageDto("User not found"));
     }
     if (!profileImageDto.isValidImageType()) {
@@ -294,14 +283,14 @@ public class UserService {
     return ResponseEntity.ok(new MessageDto("Image uploaded successfully"));
   }
 
-  public ResponseEntity<ProfileImageDto> getImage() {
+  public ResponseEntity<ProfileImageDto> getImage(String username) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     String email = userDetails.getEmail();
 
     Optional<UserEntity> user = userRepository.findByEmail(email);
 
-    if (user.isEmpty()) {
+    if (user.isEmpty() || !username.equals(userDetails.getUsername())) {
       return ResponseEntity.badRequest().build();
     }
 
@@ -320,5 +309,19 @@ public class UserService {
     profileImageDto.setImageType(profileImage.getImageType());
 
     return ResponseEntity.ok(profileImageDto);
+  }
+
+  public ResponseEntity<MessageDto> deleteImage(String username) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    String email = userDetails.getEmail();
+    Optional<UserEntity> user = userRepository.findByEmail(email);
+    if (user.isEmpty() || !username.equals(userDetails.getUsername())) {
+      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+    }
+    ProfileImage profileImage = new ProfileImage();
+    user.get().setProfileImage(profileImage);
+    userRepository.save(user.get());
+    return ResponseEntity.ok(new MessageDto("Image deleted successfully"));
   }
 }

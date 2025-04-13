@@ -1,9 +1,10 @@
-package com.masteryhub.todoapp.dto;
+package com.masteryhub.todoapp.dto.todoDto;
 
 import java.util.List;
+
 import lombok.Data;
 
 @Data
-public class TodoRequestDto {
+public class RequestTodoDtoList {
   List<RequestTodoDto> todos;
 }

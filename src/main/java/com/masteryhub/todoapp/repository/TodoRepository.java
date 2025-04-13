@@ -1,7 +1,7 @@
 package com.masteryhub.todoapp.repository;
 
-import com.masteryhub.todoapp.models.Status;
-import com.masteryhub.todoapp.models.TodoEntity;
+import com.masteryhub.todoapp.models.todoModel.Status;
+import com.masteryhub.todoapp.models.todoModel.TodoEntity;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;

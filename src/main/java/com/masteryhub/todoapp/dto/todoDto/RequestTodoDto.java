@@ -1,6 +1,6 @@
-package com.masteryhub.todoapp.dto;
+package com.masteryhub.todoapp.dto.todoDto;
 
-import com.masteryhub.todoapp.models.Status;
+import com.masteryhub.todoapp.models.todoModel.Status;
 import java.time.Instant;
 import java.util.List;
 import lombok.Getter;
