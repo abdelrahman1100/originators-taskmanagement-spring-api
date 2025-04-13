@@ -1,6 +1,6 @@
 package com.masteryhub.todoapp.security;
 
-import com.masteryhub.todoapp.models.UserEntity;
+import com.masteryhub.todoapp.models.userModel.UserEntity;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;

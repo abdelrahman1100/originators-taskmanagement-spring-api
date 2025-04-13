@@ -1,10 +1,11 @@
-package com.masteryhub.todoapp.models;
+package com.masteryhub.todoapp.models.todoModel;
 
-import com.masteryhub.todoapp.dto.AddFriendToTodoDto;
-import com.masteryhub.todoapp.dto.RequestTodoDto;
+import com.masteryhub.todoapp.dto.userDto.AddFriendToTodoDto;
+import com.masteryhub.todoapp.dto.todoDto.RequestTodoDto;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -60,7 +61,7 @@ public class TodoEntity {
     this.dueDate = requestTodoDto.getDueDate();
     this.tags = requestTodoDto.getTags();
     if (requestTodoDto.getStatus() == null) {
-      this.status = Status.todo;
+      this.status = Status.TODO;
     }
   }
 

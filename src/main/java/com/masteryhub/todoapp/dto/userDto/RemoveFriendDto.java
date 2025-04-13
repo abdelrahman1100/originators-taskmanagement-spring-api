@@ -1,10 +1,10 @@
-package com.masteryhub.todoapp.dto;
+package com.masteryhub.todoapp.dto.userDto;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
-public class RequestFriendsDto {
+public class RemoveFriendDto {
   private String username;
 }

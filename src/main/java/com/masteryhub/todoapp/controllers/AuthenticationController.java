@@ -1,9 +1,9 @@
 package com.masteryhub.todoapp.controllers;
 
-import com.masteryhub.todoapp.dto.AuthenticationResponseDto;
-import com.masteryhub.todoapp.dto.LoginDto;
-import com.masteryhub.todoapp.dto.MessageDto;
-import com.masteryhub.todoapp.dto.RegisterDto;
+import com.masteryhub.todoapp.dto.messageDto.MessageDto;
+import com.masteryhub.todoapp.dto.userDto.AuthenticationResponseDto;
+import com.masteryhub.todoapp.dto.userDto.LoginDto;
+import com.masteryhub.todoapp.dto.userDto.RegisterDto;
 import com.masteryhub.todoapp.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -38,7 +38,7 @@ public class AuthenticationController {
     return authenticationService.logout();
   }
 
-  @GetMapping("/google")
+  @GetMapping("/google/login")
   public void redirectToGoogleAuth(HttpServletResponse response) throws IOException {
     response.sendRedirect("/oauth2/authorization/google");
   }

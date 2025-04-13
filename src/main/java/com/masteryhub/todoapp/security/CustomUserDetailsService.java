@@ -1,6 +1,6 @@
 package com.masteryhub.todoapp.security;
 
-import com.masteryhub.todoapp.models.UserEntity;
+import com.masteryhub.todoapp.models.userModel.UserEntity;
 import com.masteryhub.todoapp.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,6 +1,6 @@
-package com.masteryhub.todoapp.dto;
+package com.masteryhub.todoapp.dto.userDto;
 
-import com.masteryhub.todoapp.models.Permission;
+import com.masteryhub.todoapp.models.todoModel.Permission;
 import lombok.Getter;
 import lombok.Setter;
 

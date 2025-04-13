@@ -1,4 +1,4 @@
-package com.masteryhub.todoapp.dto;
+package com.masteryhub.todoapp.dto.userDto;
 
 import lombok.Getter;
 import lombok.Setter;

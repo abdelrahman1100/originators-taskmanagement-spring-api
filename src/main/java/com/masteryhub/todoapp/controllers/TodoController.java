@@ -1,6 +1,9 @@
 package com.masteryhub.todoapp.controllers;
 
-import com.masteryhub.todoapp.dto.*;
+import com.masteryhub.todoapp.dto.messageDto.MessageDto;
+import com.masteryhub.todoapp.dto.todoDto.RequestTodoDto;
+import com.masteryhub.todoapp.dto.todoDto.RequestTodoDtoList;
+import com.masteryhub.todoapp.dto.todoDto.ResponseTodoDto;
 import com.masteryhub.todoapp.service.TodoService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +33,7 @@ public class TodoController {
     return todoService.getTodos(page, limit);
   }
 
-  @GetMapping("/filter-todos")
+  @GetMapping("/filter")
   public ResponseEntity<List<ResponseTodoDto>> filterTodos(
       @RequestBody RequestTodoDto requestTodoDto,
       @RequestParam(name = "page", defaultValue = "0") int page,
@@ -44,41 +47,43 @@ public class TodoController {
     return todoService.editTodo(requestTodoDto, id);
   }
 
-  @PutMapping("/edit-many-todos")
+  @PutMapping("/bulk")
   public ResponseEntity<List<ResponseTodoDto>> editManyTodos(
-      @RequestBody TodoRequestDto todoRequestDto) {
+      @RequestBody RequestTodoDtoList todoRequestDto) {
     List<RequestTodoDto> requestTodoDtoList = todoRequestDto.getTodos();
     return todoService.editManyTodos(requestTodoDtoList);
   }
 
-  @DeleteMapping("/id")
+  @DeleteMapping("/{id}")
   public ResponseEntity<MessageDto> softDeleteTodo(@PathVariable("id") Long id) {
     return todoService.softDeleteTodo(id);
   }
 
-  @DeleteMapping("/soft-delete-many-todo")
-  public ResponseEntity<MessageDto> softDeleteManyTodo(@RequestBody TodoRequestDto todoRequestDto) {
+  @DeleteMapping("/bulk")
+  public ResponseEntity<MessageDto> softDeleteManyTodo(
+      @RequestBody RequestTodoDtoList todoRequestDto) {
     List<RequestTodoDto> requestTodoDtoList = todoRequestDto.getTodos();
     return todoService.softDeleteManyTodo(requestTodoDtoList);
   }
 
-  @DeleteMapping("/soft-delete-all-todo")
+  @DeleteMapping("/all")
   public ResponseEntity<MessageDto> softDeleteAllTodo() {
     return todoService.softDeleteAllTodo();
   }
 
-  @PatchMapping("/restore-todo")
-  public ResponseEntity<MessageDto> restoreTodo(@RequestParam("id") Long id) {
+  @PatchMapping("/{id}/restore")
+  public ResponseEntity<MessageDto> restoreTodo(@PathVariable("id") Long id) {
     return todoService.restoreTodo(id);
   }
 
-  @PatchMapping("/restore-many-todo")
-  public ResponseEntity<MessageDto> restoreManyTodo(@RequestBody TodoRequestDto todoRequestDto) {
+  @PatchMapping("/bulk")
+  public ResponseEntity<MessageDto> restoreManyTodo(
+      @RequestBody RequestTodoDtoList todoRequestDto) {
     List<RequestTodoDto> requestTodoDtoList = todoRequestDto.getTodos();
     return todoService.restoreManyTodo(requestTodoDtoList);
   }
 
-  @PatchMapping("/restore-all-todo")
+  @PatchMapping("/all")
   public ResponseEntity<MessageDto> restoreAllTodo() {
     return todoService.restoreAllTodo();
   }
