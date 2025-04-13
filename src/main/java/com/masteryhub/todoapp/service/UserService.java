@@ -4,15 +4,18 @@ import com.masteryhub.todoapp.dtos.messageDto.MessageDto;
 import com.masteryhub.todoapp.dtos.todoDto.RequestTodoDto;
 import com.masteryhub.todoapp.dtos.todoDto.ResponseTodoDto;
 import com.masteryhub.todoapp.dtos.userDto.*;
+import com.masteryhub.todoapp.models.notificationModel.NotificationType;
 import com.masteryhub.todoapp.models.todoModel.TodoEntity;
 import com.masteryhub.todoapp.models.userModel.ProfileImage;
 import com.masteryhub.todoapp.models.userModel.UserEntity;
 import com.masteryhub.todoapp.repository.TodoRepository;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.UserDetailsImpl;
+import com.masteryhub.todoapp.service.notificationService.NotificationEvent;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,11 +26,16 @@ public class UserService {
 
   UserRepository userRepository;
   TodoRepository todoRepository;
+  ApplicationEventPublisher eventPublisher;
 
   @Autowired
-  public UserService(UserRepository userRepository, TodoRepository todoRepository) {
+  public UserService(
+      UserRepository userRepository,
+      TodoRepository todoRepository,
+      ApplicationEventPublisher eventPublisher) {
     this.userRepository = userRepository;
     this.todoRepository = todoRepository;
+    this.eventPublisher = eventPublisher;
   }
 
   public List<ResponseFriendsDto> getAllFriends() {
@@ -51,10 +59,11 @@ public class UserService {
     return ResponseEntity.ok(responseFriendsDtos).getBody();
   }
 
-  public ResponseEntity<MessageDto> addFriend(RequestFriendsDto friendsDto) {
+  public ResponseEntity<MessageDto> addFriend(RequestFriendDto friendsDto) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     String email = userDetails.getEmail();
+    String friendUsername = friendsDto.getUsername();
     Optional<UserEntity> user = userRepository.findByEmail(email);
     if (userRepository.findByUsername(friendsDto.getUsername()).isEmpty()) {
       return ResponseEntity.badRequest().body(new MessageDto("User not found"));
@@ -64,10 +73,17 @@ public class UserService {
     }
     user.get().addFriend(friendsDto.getUsername());
     userRepository.save(user.get());
+    eventPublisher.publishEvent(
+        new NotificationEvent(
+            this,
+            user.get().getUsername(),
+            friendUsername,
+            NotificationType.FRIEND_REQUEST,
+            user.get().getUsername() + " added you as a friend."));
     return ResponseEntity.ok(new MessageDto("Friend added"));
   }
 
-  public ResponseEntity<MessageDto> removeFriend(RequestFriendsDto friendsDto) {
+  public ResponseEntity<MessageDto> removeFriend(RequestFriendDto friendsDto) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     String email = userDetails.getEmail();

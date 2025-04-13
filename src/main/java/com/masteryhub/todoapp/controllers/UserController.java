@@ -22,12 +22,12 @@ public class UserController {
   }
 
   @PostMapping("/friend")
-  public ResponseEntity<MessageDto> addFriend(@RequestBody RequestFriendsDto friendsDto) {
+  public ResponseEntity<MessageDto> addFriend(@RequestBody RequestFriendDto friendsDto) {
     return userService.addFriend(friendsDto);
   }
 
   @DeleteMapping("/friend")
-  public ResponseEntity<MessageDto> removeFriend(@RequestBody RequestFriendsDto friendsDto) {
+  public ResponseEntity<MessageDto> removeFriend(@RequestBody RequestFriendDto friendsDto) {
     return userService.removeFriend(friendsDto);
   }
 
