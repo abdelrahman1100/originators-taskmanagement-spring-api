@@ -3,8 +3,8 @@ package com.masteryhub.todoapp.models.notificationModel;
 import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
-import nonapi.io.github.classgraph.json.Id;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -22,7 +22,7 @@ public class NotificationModel {
 
   private String message;
 
-  private boolean isRead = false;
+  private boolean IsRead = false;
 
   private String sender;
 
