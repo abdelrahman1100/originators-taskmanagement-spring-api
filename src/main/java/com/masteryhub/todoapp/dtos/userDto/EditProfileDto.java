@@ -1,4 +1,4 @@
-package com.masteryhub.todoapp.dto.userDto;
+package com.masteryhub.todoapp.dtos.userDto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

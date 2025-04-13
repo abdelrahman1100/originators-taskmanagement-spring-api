@@ -1,4 +1,4 @@
-package com.masteryhub.todoapp.dto.userDto;
+package com.masteryhub.todoapp.dtos.userDto;
 
 import com.masteryhub.todoapp.models.settingsModel.Theme;
 import lombok.Getter;

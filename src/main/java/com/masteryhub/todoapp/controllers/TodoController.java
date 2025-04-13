@@ -1,9 +1,9 @@
 package com.masteryhub.todoapp.controllers;
 
-import com.masteryhub.todoapp.dto.messageDto.MessageDto;
-import com.masteryhub.todoapp.dto.todoDto.RequestTodoDto;
-import com.masteryhub.todoapp.dto.todoDto.RequestTodoDtoList;
-import com.masteryhub.todoapp.dto.todoDto.ResponseTodoDto;
+import com.masteryhub.todoapp.dtos.messageDto.MessageDto;
+import com.masteryhub.todoapp.dtos.todoDto.RequestTodoDto;
+import com.masteryhub.todoapp.dtos.todoDto.RequestTodoDtoList;
+import com.masteryhub.todoapp.dtos.todoDto.ResponseTodoDto;
 import com.masteryhub.todoapp.service.TodoService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

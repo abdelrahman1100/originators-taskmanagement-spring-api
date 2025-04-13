@@ -1,7 +1,6 @@
-package com.masteryhub.todoapp.dto.todoDto;
+package com.masteryhub.todoapp.dtos.todoDto;
 
 import java.util.List;
-
 import lombok.Data;
 
 @Data

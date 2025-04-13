@@ -1,4 +1,4 @@
-package com.masteryhub.todoapp.dto.todoDto;
+package com.masteryhub.todoapp.dtos.todoDto;
 
 import java.time.Instant;
 import lombok.Getter;

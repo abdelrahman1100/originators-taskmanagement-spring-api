@@ -1,4 +1,4 @@
-package com.masteryhub.todoapp.dto.messageDto;
+package com.masteryhub.todoapp.dtos.messageDto;
 
 // TODO: add getter and setter methods to the class
 public class MessageDto {
