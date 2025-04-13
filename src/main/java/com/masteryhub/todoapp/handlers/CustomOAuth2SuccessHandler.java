@@ -1,8 +1,8 @@
 package com.masteryhub.todoapp.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.masteryhub.todoapp.dto.userDto.AuthenticationResponseDto;
-import com.masteryhub.todoapp.dto.userDto.UserDto;
+import com.masteryhub.todoapp.dtos.userDto.AuthenticationResponseDto;
+import com.masteryhub.todoapp.dtos.userDto.UserDto;
 import com.masteryhub.todoapp.models.userModel.UserEntity;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtGenerator;

@@ -1,4 +1,4 @@
-package com.masteryhub.todoapp.dto.todoDto;
+package com.masteryhub.todoapp.dtos.todoDto;
 
 import com.masteryhub.todoapp.models.todoModel.Status;
 import com.masteryhub.todoapp.models.todoModel.TodoEntity;
