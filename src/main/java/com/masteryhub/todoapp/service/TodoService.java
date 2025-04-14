@@ -1,8 +1,8 @@
 package com.masteryhub.todoapp.service;
 
-import com.masteryhub.todoapp.dto.messageDto.MessageDto;
-import com.masteryhub.todoapp.dto.todoDto.RequestTodoDto;
-import com.masteryhub.todoapp.dto.todoDto.ResponseTodoDto;
+import com.masteryhub.todoapp.dtos.messageDto.MessageDto;
+import com.masteryhub.todoapp.dtos.todoDto.RequestTodoDto;
+import com.masteryhub.todoapp.dtos.todoDto.ResponseTodoDto;
 import com.masteryhub.todoapp.models.todoModel.Status;
 import com.masteryhub.todoapp.models.todoModel.TodoEntity;
 import com.masteryhub.todoapp.models.userModel.UserEntity;

@@ -1,9 +1,9 @@
 package com.masteryhub.todoapp.controllers;
 
-import com.masteryhub.todoapp.dto.messageDto.MessageDto;
-import com.masteryhub.todoapp.dto.todoDto.RequestTodoDto;
-import com.masteryhub.todoapp.dto.todoDto.ResponseTodoDto;
-import com.masteryhub.todoapp.dto.userDto.*;
+import com.masteryhub.todoapp.dtos.messageDto.MessageDto;
+import com.masteryhub.todoapp.dtos.todoDto.RequestTodoDto;
+import com.masteryhub.todoapp.dtos.todoDto.ResponseTodoDto;
+import com.masteryhub.todoapp.dtos.userDto.*;
 import com.masteryhub.todoapp.service.UserService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +22,12 @@ public class UserController {
   }
 
   @PostMapping("/friend")
-  public ResponseEntity<MessageDto> addFriend(@RequestBody RequestFriendsDto friendsDto) {
+  public ResponseEntity<MessageDto> addFriend(@RequestBody RequestFriendDto friendsDto) {
     return userService.addFriend(friendsDto);
   }
 
   @DeleteMapping("/friend")
-  public ResponseEntity<MessageDto> removeFriend(@RequestBody RequestFriendsDto friendsDto) {
+  public ResponseEntity<MessageDto> removeFriend(@RequestBody RequestFriendDto friendsDto) {
     return userService.removeFriend(friendsDto);
   }
 

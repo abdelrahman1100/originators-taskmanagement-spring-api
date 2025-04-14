@@ -1,9 +1,9 @@
 package com.masteryhub.todoapp.controllers;
 
-import com.masteryhub.todoapp.dto.messageDto.MessageDto;
-import com.masteryhub.todoapp.dto.userDto.AuthenticationResponseDto;
-import com.masteryhub.todoapp.dto.userDto.LoginDto;
-import com.masteryhub.todoapp.dto.userDto.RegisterDto;
+import com.masteryhub.todoapp.dtos.messageDto.MessageDto;
+import com.masteryhub.todoapp.dtos.userDto.AuthenticationResponseDto;
+import com.masteryhub.todoapp.dtos.userDto.LoginDto;
+import com.masteryhub.todoapp.dtos.userDto.RegisterDto;
 import com.masteryhub.todoapp.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

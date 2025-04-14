@@ -1,7 +1,7 @@
 package com.masteryhub.todoapp.models.todoModel;
 
-import com.masteryhub.todoapp.dto.todoDto.RequestTodoDto;
-import com.masteryhub.todoapp.dto.userDto.AddFriendToTodoDto;
+import com.masteryhub.todoapp.dtos.todoDto.RequestTodoDto;
+import com.masteryhub.todoapp.dtos.userDto.AddFriendToTodoDto;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
