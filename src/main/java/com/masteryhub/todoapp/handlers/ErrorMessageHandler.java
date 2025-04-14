@@ -10,7 +10,7 @@ public class ErrorMessageHandler {
 
   static {
     try (InputStream is =
-        ErrorMessageHandler.class.getClassLoader().getResourceAsStream("messages/errors.json")) {
+        ErrorMessageHandler.class.getClassLoader().getResourceAsStream("errorMessages.json")) {
       ObjectMapper mapper = new ObjectMapper();
       root = mapper.readTree(is);
     } catch (Exception e) {
