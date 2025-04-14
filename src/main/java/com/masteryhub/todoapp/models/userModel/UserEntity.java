@@ -1,10 +1,9 @@
 package com.masteryhub.todoapp.models.userModel;
 
+import com.masteryhub.todoapp.models.settingsModel.Settings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.masteryhub.todoapp.models.settingsModel.Settings;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
