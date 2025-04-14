@@ -4,7 +4,6 @@ import com.masteryhub.todoapp.dtos.messageDto.MessageDto;
 import com.masteryhub.todoapp.dtos.userDto.AuthenticationResponseDto;
 import com.masteryhub.todoapp.dtos.userDto.LoginDto;
 import com.masteryhub.todoapp.dtos.userDto.RegisterDto;
-import com.masteryhub.todoapp.dtos.userDto.UserDto;
 import com.masteryhub.todoapp.models.userModel.UserEntity;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtGenerator;
@@ -85,7 +84,7 @@ public class AuthenticationService {
     String token = jwtGenerator.generateToken(userDetails);
     return new ResponseEntity<>(
         new AuthenticationResponseDto(
-            token, new UserDto(userDetails.getUsername(), userDetails.getEmail())),
+            token, userRepository.findByUsername(userDetails.getUsername()).get()),
         HttpStatus.OK);
   }
 
