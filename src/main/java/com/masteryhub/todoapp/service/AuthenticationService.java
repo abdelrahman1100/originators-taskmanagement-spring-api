@@ -5,6 +5,7 @@ import com.masteryhub.todoapp.dto.userDto.AuthenticationResponseDto;
 import com.masteryhub.todoapp.dto.userDto.LoginDto;
 import com.masteryhub.todoapp.dto.userDto.RegisterDto;
 import com.masteryhub.todoapp.dto.userDto.UserDto;
+import com.masteryhub.todoapp.handlers.ErrorMessageHandler;
 import com.masteryhub.todoapp.models.userModel.UserEntity;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtGenerator;
@@ -50,12 +51,12 @@ public class AuthenticationService {
     }
     if (userRepository.existsByUsername(registerDto.getUsername())) {
       MessageDto message = new MessageDto();
-      message.setMessage("Username is already taken!");
+      message.setMessage(ErrorMessageHandler.User.get_user_exist());
       return new ResponseEntity<>(message, HttpStatus.CONFLICT);
     }
     if (userRepository.existsByEmail(registerDto.getEmail())) {
       MessageDto message = new MessageDto();
-      message.setMessage("Email is already taken!");
+      message.setMessage(ErrorMessageHandler.User.get_user_exist());
       return new ResponseEntity<>(message, HttpStatus.CONFLICT);
     }
     if (!registerDto.getPassword().equals(registerDto.getConfirmPassword())) {

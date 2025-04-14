@@ -4,6 +4,7 @@ import com.masteryhub.todoapp.dto.messageDto.MessageDto;
 import com.masteryhub.todoapp.dto.todoDto.RequestTodoDto;
 import com.masteryhub.todoapp.dto.todoDto.ResponseTodoDto;
 import com.masteryhub.todoapp.dto.userDto.*;
+import com.masteryhub.todoapp.handlers.ErrorMessageHandler;
 import com.masteryhub.todoapp.models.todoModel.TodoEntity;
 import com.masteryhub.todoapp.models.userModel.ProfileImage;
 import com.masteryhub.todoapp.models.userModel.UserEntity;
@@ -57,10 +58,12 @@ public class UserService {
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
     if (userRepository.findByUsername(friendsDto.getUsername()).isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     if (user.get().getFriends().contains(friendsDto.getUsername())) {
-      return ResponseEntity.badRequest().body(new MessageDto("Friend already exists"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.Todo.get_user_already_friend()));
     }
     user.get().addFriend(friendsDto.getUsername());
     userRepository.save(user.get());
@@ -73,7 +76,8 @@ public class UserService {
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
     if (userRepository.findByUsername(friendsDto.getUsername()).isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     if (!user.get().getFriends().contains(friendsDto.getUsername())) {
       return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
@@ -89,11 +93,12 @@ public class UserService {
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
     if (user.isEmpty() || !username.equals(userDetails.getUsername())) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     user.get().getSettings().getTheme().setPrimaryColor(settingsDto.getTheme().getPrimaryColor());
     userRepository.save(user.get());
-    return ResponseEntity.ok(new MessageDto("Theme updated"));
+    return ResponseEntity.ok(new MessageDto("Settings Updated"));
   }
 
   public ResponseEntity<UserSettingsDto> getUserSettings(String username) {
@@ -115,14 +120,15 @@ public class UserService {
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
     if (user.isEmpty() || !username.equals(userDetails.getUsername())) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     UserEntity userEntity = user.get();
     userEntity.setFullName(editProfileDto.getFullName());
     userEntity.setPhoneNumber(editProfileDto.getPhoneNumber());
     userEntity.setAddress(editProfileDto.getAddress());
     userRepository.save(userEntity);
-    return ResponseEntity.ok(new MessageDto("Profile updated"));
+    return ResponseEntity.ok(new MessageDto("Profile Updated"));
   }
 
   public ResponseEntity<MessageDto> addFriendToTodo(
@@ -132,20 +138,25 @@ public class UserService {
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
     if (user.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     Optional<TodoEntity> todo = todoRepository.findByUserIdAndCustomId(user.get().getId(), id);
     if (todo.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("Todo not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.Todo.get_todo_not_found()));
     }
     if (todo.get().getFriendByUsername(addFriendToTodoDto.getUsername()) != null) {
-      return ResponseEntity.badRequest().body(new MessageDto("Friend already exists"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.Todo.get_user_already_friend()));
     }
     if (userRepository.findByUsername(addFriendToTodoDto.getUsername()).isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     if (!user.get().getFriends().contains(addFriendToTodoDto.getUsername())) {
-      return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.Todo.get_user_already_friend()));
     }
     TodoEntity todoEntity = todo.get();
     todoEntity.addFriend(addFriendToTodoDto);
@@ -159,18 +170,21 @@ public class UserService {
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
     if (user.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     Optional<TodoEntity> todo = todoRepository.findByUserIdAndCustomId(user.get().getId(), id);
     if (todo.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("Todo not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.Todo.get_todo_not_found()));
     }
     TodoEntity todoEntity = todo.get();
     if (todoEntity.getFriendByUsername(removeFriendDto.getUsername()) == null) {
       return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
     }
     if (userRepository.findByUsername(removeFriendDto.getUsername()).isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     if (!user.get().getFriends().contains(removeFriendDto.getUsername())) {
       return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
@@ -219,18 +233,21 @@ public class UserService {
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
     if (user.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     Optional<TodoEntity> todo = todoRepository.findByUserIdAndCustomId(user.get().getId(), id);
     if (todo.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("Todo not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.Todo.get_todo_not_found()));
     }
     TodoEntity todoEntity = todo.get();
     if (todoEntity.getFriendByUsername(addFriendToTodoDto.getUsername()) == null) {
       return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
     }
     if (userRepository.findByUsername(addFriendToTodoDto.getUsername()).isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     if (!user.get().getFriends().contains(addFriendToTodoDto.getUsername())) {
       return ResponseEntity.badRequest().body(new MessageDto("Friend doesn't exists"));
@@ -246,11 +263,13 @@ public class UserService {
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
     if (user.isEmpty()) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     TodoEntity todo = todoRepository.findByFriendsUsernameAndCustomId(user.get().getUsername(), id);
     if (todo == null) {
-      return ResponseEntity.badRequest().body(new MessageDto("Todo not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.Todo.get_todo_not_found()));
     }
     TodoEntity todoEntity = todo;
     todoEntity.setTitle(requestTodoDto.getTitle());
@@ -267,7 +286,8 @@ public class UserService {
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
     if (user.isEmpty() || !username.equals(userDetails.getUsername())) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     if (!profileImageDto.isValidImageType()) {
       return ResponseEntity.badRequest().body(new MessageDto("Invalid image type"));
@@ -317,7 +337,8 @@ public class UserService {
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
     if (user.isEmpty() || !username.equals(userDetails.getUsername())) {
-      return ResponseEntity.badRequest().body(new MessageDto("User not found"));
+      return ResponseEntity.badRequest()
+          .body(new MessageDto(ErrorMessageHandler.User.get_user_not_found()));
     }
     ProfileImage profileImage = new ProfileImage();
     user.get().setProfileImage(profileImage);
