@@ -1,6 +1,6 @@
 package com.masteryhub.todoapp.repository;
 
-import com.masteryhub.todoapp.models.UserEntity;
+import com.masteryhub.todoapp.models.userModel.UserEntity;
 import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 

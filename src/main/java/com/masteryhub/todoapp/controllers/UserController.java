@@ -1,6 +1,9 @@
 package com.masteryhub.todoapp.controllers;
 
-import com.masteryhub.todoapp.dto.*;
+import com.masteryhub.todoapp.dtos.messageDto.MessageDto;
+import com.masteryhub.todoapp.dtos.todoDto.RequestTodoDto;
+import com.masteryhub.todoapp.dtos.todoDto.ResponseTodoDto;
+import com.masteryhub.todoapp.dtos.userDto.*;
 import com.masteryhub.todoapp.service.UserService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,44 +11,41 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
 
   @Autowired UserService userService;
 
-  @GetMapping("/get-all-friends")
+  @GetMapping("/friends")
   public List<ResponseFriendsDto> getAllFriends() {
     return userService.getAllFriends();
   }
 
-  @PatchMapping("/add-friend")
-  public ResponseEntity<MessageDto> addFriend(@RequestBody RequestFriendsDto friendsDto) {
+  @PostMapping("/friend")
+  public ResponseEntity<MessageDto> addFriend(@RequestBody RequestFriendDto friendsDto) {
     return userService.addFriend(friendsDto);
   }
 
-  @PatchMapping("/remove-friend")
-  public ResponseEntity<MessageDto> removeFriend(@RequestBody RequestFriendsDto friendsDto) {
+  @DeleteMapping("/friend")
+  public ResponseEntity<MessageDto> removeFriend(@RequestBody RequestFriendDto friendsDto) {
     return userService.removeFriend(friendsDto);
   }
 
-  @PatchMapping("/edit-displaymode")
-  public ResponseEntity<MessageDto> editDisplayMode(@RequestBody DisplayModeDto displayModeDto) {
-    return userService.editDisplayMode(displayModeDto);
+  @PatchMapping("/profile/{username}/settings")
+  public ResponseEntity<MessageDto> editSettings(
+      @RequestBody SettingsDto settingsDto, @PathVariable String username) {
+    return userService.editSettings(settingsDto, username);
   }
 
-  @PatchMapping("/edit-theme")
-  public ResponseEntity<MessageDto> editTheme(@RequestBody PrimaryColorDto primaryColorDto) {
-    return userService.editTheme(primaryColorDto);
+  @GetMapping("/profile/{username}/settings")
+  public ResponseEntity<UserSettingsDto> getUserSettings(@PathVariable String username) {
+    return userService.getUserSettings(username);
   }
 
-  @GetMapping("/settings")
-  public ResponseEntity<UserSettingsDto> getUserSettings() {
-    return userService.getUserSettings();
-  }
-
-  @PatchMapping("/edit-profile")
-  public ResponseEntity<MessageDto> editProfile(@RequestBody EditProfileDto editProfileDto) {
-    return userService.editProfile(editProfileDto);
+  @PatchMapping("/profile/{username}")
+  public ResponseEntity<MessageDto> editProfile(
+      @RequestBody EditProfileDto editProfileDto, @PathVariable String username) {
+    return userService.editProfile(editProfileDto, username);
   }
 
   @PostMapping("/add/friend/todo/{id}")
@@ -82,13 +82,19 @@ public class UserController {
     return userService.editSharedTodo(requestTodoDto, id);
   }
 
-  @PostMapping("/upload-image")
-  public ResponseEntity<MessageDto> uploadImage(@RequestBody ProfileImageDto profileImageDto) {
-    return userService.uploadImage(profileImageDto);
+  @PostMapping("/profile/{username}/settings/profile-image")
+  public ResponseEntity<MessageDto> uploadImage(
+      @RequestBody ProfileImageDto profileImageDto, @PathVariable String username) {
+    return userService.uploadImage(profileImageDto, username);
   }
 
-  @GetMapping("/get-image")
-  public ResponseEntity<ProfileImageDto> getImage() {
-    return userService.getImage();
+  @GetMapping("/profile/{username}/settings/profile-image")
+  public ResponseEntity<ProfileImageDto> getImage(@PathVariable String username) {
+    return userService.getImage(username);
+  }
+
+  @DeleteMapping("/profile/{username}/settings/profile-image")
+  public ResponseEntity<MessageDto> deleteImage(@PathVariable String username) {
+    return userService.deleteImage(username);
   }
 }

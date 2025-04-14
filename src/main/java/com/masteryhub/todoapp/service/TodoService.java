@@ -1,11 +1,11 @@
 package com.masteryhub.todoapp.service;
 
-import com.masteryhub.todoapp.dto.MessageDto;
-import com.masteryhub.todoapp.dto.RequestTodoDto;
-import com.masteryhub.todoapp.dto.ResponseTodoDto;
-import com.masteryhub.todoapp.models.Status;
-import com.masteryhub.todoapp.models.TodoEntity;
-import com.masteryhub.todoapp.models.UserEntity;
+import com.masteryhub.todoapp.dtos.messageDto.MessageDto;
+import com.masteryhub.todoapp.dtos.todoDto.RequestTodoDto;
+import com.masteryhub.todoapp.dtos.todoDto.ResponseTodoDto;
+import com.masteryhub.todoapp.models.todoModel.Status;
+import com.masteryhub.todoapp.models.todoModel.TodoEntity;
+import com.masteryhub.todoapp.models.userModel.UserEntity;
 import com.masteryhub.todoapp.repository.TodoRepository;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.UserDetailsImpl;
