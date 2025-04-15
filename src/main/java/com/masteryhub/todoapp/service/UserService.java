@@ -166,6 +166,13 @@ public class UserService {
     TodoEntity todoEntity = todo.get();
     todoEntity.addFriend(addFriendToTodoDto);
     todoRepository.save(todoEntity);
+    eventPublisher.publishEvent(
+        new NotificationEvent(
+            this,
+            user.get().getUsername(),
+            addFriendToTodoDto.getUsername(),
+            NotificationType.TODO_SHARED,
+            user.get().getUsername() + " added you to todo."));
     return ResponseEntity.ok(new MessageDto("Friend added to todo"));
   }
 
@@ -274,6 +281,17 @@ public class UserService {
     todoEntity.setDueDate(requestTodoDto.getDueDate());
     todoEntity.setStatus(requestTodoDto.getStatus());
     todoRepository.save(todoEntity);
+    if (todoEntity.getFriends() != null) {
+      for (AddFriendToTodoDto friend : todoEntity.getFriends()) {
+        eventPublisher.publishEvent(
+            new NotificationEvent(
+                this,
+                user.get().getUsername(),
+                friend.getUsername(),
+                NotificationType.TODO_UPDATED,
+                user.get().getUsername() + " updated the todo."));
+      }
+    }
     return ResponseEntity.ok(new MessageDto("Shared Todo updated"));
   }
 

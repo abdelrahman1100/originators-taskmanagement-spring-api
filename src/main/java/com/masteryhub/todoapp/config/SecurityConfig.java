@@ -2,6 +2,7 @@ package com.masteryhub.todoapp.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.masteryhub.todoapp.handlers.CustomOAuth2SuccessHandler;
+import com.masteryhub.todoapp.repository.TodoRepository;
 import com.masteryhub.todoapp.repository.UserRepository;
 import com.masteryhub.todoapp.security.JwtAuthEntryPoint;
 import com.masteryhub.todoapp.security.JwtAuthenticationFilter;
@@ -78,7 +79,11 @@ public class SecurityConfig {
 
   @Bean
   public CustomOAuth2SuccessHandler customOAuth2SuccessHandler(
-      UserRepository userRepository, JwtGenerator jwtGenerator, ObjectMapper objectMapper) {
-    return new CustomOAuth2SuccessHandler(userRepository, jwtGenerator, objectMapper);
+      UserRepository userRepository,
+      JwtGenerator jwtGenerator,
+      ObjectMapper objectMapper,
+      TodoRepository todoRepository) {
+    return new CustomOAuth2SuccessHandler(
+        userRepository, jwtGenerator, objectMapper, todoRepository);
   }
 }
