@@ -77,7 +77,7 @@ public class AuthenticationService {
     user.setAddress(registerDto.getAddress());
     userRepository.save(user);
     MessageDto message = new MessageDto();
-    message.setMessage("User Registered Successfully!");
+    message.setMessage("User Registered Successfully");
     return new ResponseEntity<>(message, HttpStatus.OK);
   }
 
@@ -91,6 +91,10 @@ public class AuthenticationService {
     UserEntity user = userRepository.findByEmail(userDetails.getEmail()).get();
     List<String> todo = user.getTodos();
     List<TodoEntity> todoList = new ArrayList<>();
+    if (todo.size() == 0) {
+      return new ResponseEntity<>(
+          new AuthenticationResponseDto(token, user, todoList), HttpStatus.OK);
+    }
     for (int i = 0; i < 5; i++) {
       TodoEntity todoEntity = todoRepository.findById(todo.get(i)).get();
       todoList.add(todoEntity);

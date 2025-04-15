@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/todos")
+@RequestMapping("/todo")
 public class TodoController {
 
   @Autowired TodoService todoService;
@@ -21,70 +21,77 @@ public class TodoController {
     return todoService.createTodo(requestTodoDto);
   }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<ResponseTodoDto> getTodo(@PathVariable("id") Long id) {
-    return todoService.getTodo(id);
+  @GetMapping("/{username}/{id}")
+  public ResponseEntity<ResponseTodoDto> getTodo(
+      @PathVariable("id") Long id, @PathVariable("username") String username) {
+    return todoService.getTodo(id, username);
   }
 
-  @GetMapping("/")
+  @GetMapping("/{username}")
   public ResponseEntity<List<ResponseTodoDto>> getTodos(
       @RequestParam(name = "page", defaultValue = "0") int page,
-      @RequestParam(name = "size", defaultValue = "10") int limit) {
-    return todoService.getTodos(page, limit);
+      @RequestParam(name = "size", defaultValue = "10") int limit,
+      @PathVariable("username") String username) {
+    return todoService.getTodos(page, limit, username);
   }
 
-  @GetMapping("/filter")
+  @GetMapping("/{username}/filter")
   public ResponseEntity<List<ResponseTodoDto>> filterTodos(
       @RequestBody RequestTodoDto requestTodoDto,
       @RequestParam(name = "page", defaultValue = "0") int page,
-      @RequestParam(name = "size", defaultValue = "10") int size) {
-    return todoService.filterTodos(requestTodoDto, page, size);
+      @RequestParam(name = "size", defaultValue = "10") int size,
+      @PathVariable("username") String username) {
+    return todoService.filterTodos(requestTodoDto, page, size, username);
   }
 
-  @PutMapping("/{id}")
+  @PutMapping("/{username}/{id}")
   public ResponseEntity<ResponseTodoDto> editTodo(
-      @RequestBody RequestTodoDto requestTodoDto, @PathVariable("id") Long id) {
-    return todoService.editTodo(requestTodoDto, id);
+      @RequestBody RequestTodoDto requestTodoDto,
+      @PathVariable("id") Long id,
+      @PathVariable("username") String username) {
+    return todoService.editTodo(requestTodoDto, id, username);
   }
 
-  @PutMapping("/bulk")
+  @PutMapping("/{username}/bulk")
   public ResponseEntity<List<ResponseTodoDto>> editManyTodos(
-      @RequestBody RequestTodoDtoList todoRequestDto) {
+      @RequestBody RequestTodoDtoList todoRequestDto, @PathVariable("username") String username) {
     List<RequestTodoDto> requestTodoDtoList = todoRequestDto.getTodos();
-    return todoService.editManyTodos(requestTodoDtoList);
+    return todoService.editManyTodos(requestTodoDtoList, username);
   }
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<MessageDto> softDeleteTodo(@PathVariable("id") Long id) {
-    return todoService.softDeleteTodo(id);
+  @DeleteMapping("/{username}/{id}")
+  public ResponseEntity<MessageDto> softDeleteTodo(
+      @PathVariable("id") Long id, @PathVariable("username") String username) {
+    return todoService.softDeleteTodo(id, username);
   }
 
-  @DeleteMapping("/bulk")
+  @DeleteMapping("/{username}/bulk")
   public ResponseEntity<MessageDto> softDeleteManyTodo(
-      @RequestBody RequestTodoDtoList todoRequestDto) {
+      @RequestBody RequestTodoDtoList todoRequestDto, @PathVariable("username") String username) {
     List<RequestTodoDto> requestTodoDtoList = todoRequestDto.getTodos();
-    return todoService.softDeleteManyTodo(requestTodoDtoList);
+    return todoService.softDeleteManyTodo(requestTodoDtoList, username);
   }
 
-  @DeleteMapping("/all")
-  public ResponseEntity<MessageDto> softDeleteAllTodo() {
-    return todoService.softDeleteAllTodo();
+  @DeleteMapping("/{username}/all")
+  public ResponseEntity<MessageDto> softDeleteAllTodo(@PathVariable("username") String username) {
+    return todoService.softDeleteAllTodo(username);
   }
 
-  @PatchMapping("/{id}/restore")
-  public ResponseEntity<MessageDto> restoreTodo(@PathVariable("id") Long id) {
-    return todoService.restoreTodo(id);
+  @PatchMapping("/{username}/restore/{id}")
+  public ResponseEntity<MessageDto> restoreTodo(
+      @PathVariable("id") Long id, @PathVariable("username") String username) {
+    return todoService.restoreTodo(id, username);
   }
 
-  @PatchMapping("/bulk")
+  @PatchMapping("/{username}/restore/bulk")
   public ResponseEntity<MessageDto> restoreManyTodo(
-      @RequestBody RequestTodoDtoList todoRequestDto) {
+      @RequestBody RequestTodoDtoList todoRequestDto, @PathVariable("username") String username) {
     List<RequestTodoDto> requestTodoDtoList = todoRequestDto.getTodos();
-    return todoService.restoreManyTodo(requestTodoDtoList);
+    return todoService.restoreManyTodo(requestTodoDtoList, username);
   }
 
-  @PatchMapping("/all")
-  public ResponseEntity<MessageDto> restoreAllTodo() {
-    return todoService.restoreAllTodo();
+  @PatchMapping("/{username}/restore")
+  public ResponseEntity<MessageDto> restoreAllTodo(@PathVariable("username") String username) {
+    return todoService.restoreAllTodo(username);
   }
 }

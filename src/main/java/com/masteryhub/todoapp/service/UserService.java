@@ -38,12 +38,12 @@ public class UserService {
     this.eventPublisher = eventPublisher;
   }
 
-  public List<ResponseFriendsDto> getAllFriends() {
+  public List<ResponseFriendsDto> getAllFriends(String name) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     String email = userDetails.getEmail();
     Optional<UserEntity> user = userRepository.findByEmail(email);
-    if (user.isEmpty()) {
+    if (user.isEmpty() || !name.equals(userDetails.getUsername())) {
       return Collections.emptyList();
     }
     List<ResponseFriendsDto> responseFriendsDtos =
