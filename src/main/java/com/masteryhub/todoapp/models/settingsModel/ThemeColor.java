@@ -1,6 +1,6 @@
 package com.masteryhub.todoapp.models.settingsModel;
 
-public enum PrimaryColor {
+public enum ThemeColor {
   RED("#FF0000"),
   GREEN("#00FF00"),
   BLUE("#0000FF"),
@@ -14,7 +14,7 @@ public enum PrimaryColor {
 
   private final String hexValue;
 
-  PrimaryColor(String hexValue) {
+  ThemeColor(String hexValue) {
     this.hexValue = hexValue;
   }
 

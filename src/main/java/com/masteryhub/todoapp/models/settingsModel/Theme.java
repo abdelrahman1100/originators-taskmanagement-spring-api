@@ -1,32 +1,32 @@
 package com.masteryhub.todoapp.models.settingsModel;
 
 public class Theme {
-  private Boolean isLight;
-  private PrimaryColor primaryColor;
+  private Boolean DisplayMode;
+  private ThemeColor themeColor;
 
   public Theme() {
-    this.isLight = true;
-    this.primaryColor = PrimaryColor.RED;
+    this.DisplayMode = true;
+    this.themeColor = ThemeColor.RED;
   }
 
-  public Theme(Boolean isLight, PrimaryColor primaryColor) {
-    this.isLight = isLight;
-    this.primaryColor = primaryColor;
+  public Theme(Boolean DisplayMode, ThemeColor themeColor) {
+    this.DisplayMode = DisplayMode;
+    this.themeColor = themeColor;
   }
 
-  public Boolean getIsLight() {
-    return isLight;
+  public Boolean getDisplayMode() {
+    return DisplayMode;
   }
 
-  public void setIsLight(Boolean isLight) {
-    this.isLight = isLight;
+  public void setDisplayMode(Boolean displayMode) {
+    this.DisplayMode = displayMode;
   }
 
-  public PrimaryColor getPrimaryColor() {
-    return primaryColor;
+  public ThemeColor getPrimaryColor() {
+    return themeColor;
   }
 
-  public void setPrimaryColor(PrimaryColor primaryColor) {
-    this.primaryColor = primaryColor;
+  public void setPrimaryColor(ThemeColor themeColor) {
+    this.themeColor = themeColor;
   }
 }
