@@ -11,38 +11,38 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 public class UserController {
 
   @Autowired UserService userService;
 
-  @GetMapping("/friends")
-  public List<ResponseFriendsDto> getAllFriends() {
-    return userService.getAllFriends();
+  @GetMapping("/{username}/friend")
+  public List<ResponseFriendsDto> getAllFriends(@PathVariable String username) {
+    return userService.getAllFriends(username);
   }
 
-  @PostMapping("/friend")
+  @PostMapping("/{username}/friend")
   public ResponseEntity<MessageDto> addFriend(@RequestBody RequestFriendDto friendsDto) {
     return userService.addFriend(friendsDto);
   }
 
-  @DeleteMapping("/friend")
+  @DeleteMapping("/{username}/friend/{friendUsername}")
   public ResponseEntity<MessageDto> removeFriend(@RequestBody RequestFriendDto friendsDto) {
     return userService.removeFriend(friendsDto);
   }
 
-  @PatchMapping("/profile/{username}/settings")
+  @PatchMapping("/{username}/settings")
   public ResponseEntity<MessageDto> editSettings(
       @RequestBody SettingsDto settingsDto, @PathVariable String username) {
     return userService.editSettings(settingsDto, username);
   }
 
-  @GetMapping("/profile/{username}/settings")
+  @GetMapping("/{username}/settings")
   public ResponseEntity<UserSettingsDto> getUserSettings(@PathVariable String username) {
     return userService.getUserSettings(username);
   }
 
-  @PatchMapping("/profile/{username}")
+  @PatchMapping("/{username}/profile")
   public ResponseEntity<MessageDto> editProfile(
       @RequestBody EditProfileDto editProfileDto, @PathVariable String username) {
     return userService.editProfile(editProfileDto, username);
@@ -82,13 +82,13 @@ public class UserController {
     return userService.editSharedTodo(requestTodoDto, id);
   }
 
-  @PostMapping("/profile/{username}/settings/profile-image")
+  @PostMapping("/{username}/profile-image")
   public ResponseEntity<MessageDto> uploadImage(
       @RequestBody ProfileImageDto profileImageDto, @PathVariable String username) {
     return userService.uploadImage(profileImageDto, username);
   }
 
-  @GetMapping("/profile/{username}/settings/profile-image")
+  @GetMapping("/{username}/profile-image")
   public ResponseEntity<ProfileImageDto> getImage(@PathVariable String username) {
     return userService.getImage(username);
   }
